@@ -27,3 +27,19 @@
 *.i*86
 *.x86_64
 *.hex
+
+*/
+.metadata
+*.swp
+
+!Custom Checkout 2.03.0/
+!Custom ShopFlow 1.05.0/
+!Custom My Account Premium 1.04/
+
+!Custom Checkout 2.03.0/**
+!Custom ShopFlow 1.05.0/**
+!Custom My Account Premium 1.04.0/**
+
+styles.css
+project.xml
+.DS_Store
