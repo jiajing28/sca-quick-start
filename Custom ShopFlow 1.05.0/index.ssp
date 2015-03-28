@@ -168,8 +168,6 @@ if (!SC.isPageGenerator())
 }
 </script>
 
-<script src="SCA-Quick-Start/EC-Image-Slider/index.ssp" type="text/javascript"></script>
-
 </head>
 
 <body>
@@ -216,12 +214,16 @@ if (!SC.isCrossOrigin())
 		SC.ENVIRONMENT.PROFILE = {};
 	}
 
+	
+	
 	// Loads the application files, if you need to have a less agresive cacheing you can move them 
 	// to the sc.environment.ssp (Moderate cacheing) or to the sc.user.environment.ssp (No cache but less performant)
 	loadScript([
 		'<%= session.getAbsoluteUrl("shopping", 'js/libs/Libraries-014c4d649507.js') %>'
 	,	'<%= session.getAbsoluteUrl("shopping", 'templates/Templates-014c4d63fb53.js') %>'
-	,	'<%= session.getAbsoluteUrl("shopping", 'js/Application-014c4e0b5caf.js') %>'
+	//,	'<%= session.getAbsoluteUrl("shopping", 'js/Application-014c5cbcf4dc.js') %>'
+	//,	'/SCA-Quick-Start/EC-Image-Slider/index.ssp'
+	//,	'<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>'
 	]);
 
 	if (SC.ENVIRONMENT.jsEnvironment == 'browser')
@@ -234,6 +236,10 @@ if (!SC.isCrossOrigin())
 }
 
 </script>
+
+<script src='<%= session.getAbsoluteUrl("shopping", 'js/Application-014c5cbcf4dc.js') %>' type="text/javascript"></script>
+<script src="/SCA-Quick-Start/EC-Image-Slider/index.ssp" type="text/javascript"></script>
+<script src='<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>' type="text/javascript"></script>
 
 <link rel="stylesheet" href="<%= session.getAbsoluteUrl('shopping', 'skins/standard/Styles-014c4d643e26.css') %>">
 </body>
