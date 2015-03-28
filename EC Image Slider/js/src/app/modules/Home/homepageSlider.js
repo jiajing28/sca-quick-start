@@ -14,8 +14,8 @@ define('SliderImages', function()
 		}
 	});
 	SliderImages.Collection = Backbone.Collection.extend({
-		//url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
-		url: '/SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=Anime'
+		url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
+	//	url: '/SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=Anime'
 	,	model: SliderImages.Model
 	});
 	SliderImages.View = Backbone.View.extend({
@@ -48,6 +48,7 @@ define('SliderImages', function()
 			collection.fetch({
 				success: function ()
 				{
+					console.log();
 					view.showContent();
 				}
 			});
