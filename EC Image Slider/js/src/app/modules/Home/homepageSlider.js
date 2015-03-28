@@ -14,7 +14,8 @@ define('SliderImages', function()
 		}
 	});
 	SliderImages.Collection = Backbone.Collection.extend({
-		url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
+		//url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
+		url: '/SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=Anime'
 	,	model: SliderImages.Model
 	});
 	SliderImages.View = Backbone.View.extend({
@@ -26,7 +27,8 @@ define('SliderImages', function()
 	SliderImages.Router = Backbone.Router.extend({
 		routes: {
 			'slider': 'customHomePage'
-		//,	'?*params': 'customHomePage'
+		,	'': 'customHomePage'
+		,	'?*params': 'customHomePage'
 		}
 		
 	,	initialize: function (application)
@@ -54,6 +56,18 @@ define('SliderImages', function()
 	
 	SliderImages.mountToApp = function(application)
 	{
+		/*
+		var router = new Router(application);
+		
+		router.on("route", function(route, params) {
+			console.log('router');
+			console.log(route); //will be called every route change in addition to the appropriate other callbacks.
+			if(route!=="") {
+				
+			}
+		});
+		*/
+		
 		return new SliderImages.Router(application);
 		
 	};

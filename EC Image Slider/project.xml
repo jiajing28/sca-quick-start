@@ -7,13 +7,33 @@
           <altTagCaption></altTagCaption>
         </file>
       </folder>
-      <file name="homepageSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+      <folder name="src" bundleable="false" exclude="false">
+        <folder name="app" bundleable="false" exclude="false">
+          <folder name="modules" bundleable="false" exclude="false">
+            <folder name="Home" bundleable="false" exclude="false">
+              <file name="homepageSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                <description></description>
+                <altTagCaption></altTagCaption>
+              </file>
+            </folder>
+            <folder name="OwlCarousel" bundleable="false" exclude="false">
+              <file name="OwlCarousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                <description></description>
+                <altTagCaption></altTagCaption>
+              </file>
+            </folder>
+          </folder>
+        </folder>
+      </folder>
+    </folder>
+    <folder name="services" bundleable="false">
+      <file name="slider-imgs.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
         <altTagCaption></altTagCaption>
       </file>
     </folder>
-    <folder name="services" bundleable="false">
-      <file name="slider-imgs.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+    <folder name="skins" bundleable="false" exclude="false">
+      <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
         <altTagCaption></altTagCaption>
       </file>
