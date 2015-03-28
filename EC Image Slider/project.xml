@@ -1,0 +1,48 @@
+<project info="SuiteCloud IDE generated file, do not edit." setAttributesOnUpdate="false">
+  <folder name="EC Image Slider" bundleable="false">
+    <folder name="js" bundleable="false">
+      <folder name="libs" bundleable="false" exclude="false">
+        <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+          <description></description>
+          <altTagCaption></altTagCaption>
+        </file>
+      </folder>
+      <file name="homepageSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <description></description>
+        <altTagCaption></altTagCaption>
+      </file>
+    </folder>
+    <folder name="services" bundleable="false">
+      <file name="slider-imgs.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <description></description>
+        <altTagCaption></altTagCaption>
+      </file>
+    </folder>
+    <folder name="templates" bundleable="false">
+      <folder name="home" bundleable="false">
+        <folder name="macros" bundleable="false">
+          <file name="slider_img_macro.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+            <description></description>
+            <altTagCaption>macro</altTagCaption>
+          </file>
+        </folder>
+        <file name="home_alt.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_shiftJis">
+          <description></description>
+          <altTagCaption>EC_home_tmpl</altTagCaption>
+        </file>
+      </folder>
+      <file name="home_alt.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <description></description>
+        <altTagCaption>home_tmpl</altTagCaption>
+      </file>
+      <file name="templates.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <description></description>
+        <altTagCaption></altTagCaption>
+      </file>
+    </folder>
+    <file name="index.ssp" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+      <description></description>
+      <altTagCaption></altTagCaption>
+    </file>
+  </folder>
+</project>
