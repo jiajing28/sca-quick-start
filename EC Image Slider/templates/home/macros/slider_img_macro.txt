@@ -4,8 +4,8 @@
 	console.log(item);
 %>
 <div class="item">
-	<a href="<%= item.get('custrecord_ec_imgslider_link') %>">
-		<img src="<%= item.get('custrecord_ec_imgslider_imgdesk').name %>" alt="<%= item.get('custrecord_ec_imgslider_alt') %>" /> 
+	<a href="<%= item.get('link') %>">
+		<img src="<%= item.get('imgdesktop') %>" alt="<%= item.get('alttext') %>" /> 
 		
 	</a>
 </div>

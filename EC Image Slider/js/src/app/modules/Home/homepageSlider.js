@@ -10,11 +10,11 @@ define('SliderImages', function()
 	SliderImages.Model = Backbone.Model.extend({
 		parse: function (response)
 		{
-			return response.columns;
+			return response;
 		}
 	});
 	SliderImages.Collection = Backbone.Collection.extend({
-		//url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
+	//	url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
 		url: '/SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=Anime'
 	,	model: SliderImages.Model
 	});
@@ -48,6 +48,7 @@ define('SliderImages', function()
 			collection.fetch({
 				success: function ()
 				{
+					console.log(collection);
 					view.showContent();
 				}
 			});

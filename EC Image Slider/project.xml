@@ -7,10 +7,10 @@
           <altTagCaption></altTagCaption>
         </file>
       </folder>
-      <folder name="src" bundleable="false" exclude="false">
-        <folder name="app" bundleable="false" exclude="false">
-          <folder name="modules" bundleable="false" exclude="false">
-            <folder name="Home" bundleable="false" exclude="false">
+      <folder name="src" bundleable="false">
+        <folder name="app" bundleable="false">
+          <folder name="modules" bundleable="false">
+            <folder name="Home" bundleable="false">
               <file name="homepageSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
                 <description></description>
                 <altTagCaption></altTagCaption>
@@ -27,6 +27,7 @@
       </folder>
     </folder>
     <folder name="services" bundleable="false">
+      <file name="ecqsGetSlider.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="slider-imgs.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
         <altTagCaption></altTagCaption>
