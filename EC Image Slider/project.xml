@@ -7,10 +7,16 @@
           <altTagCaption></altTagCaption>
         </file>
       </folder>
-      <folder name="src" bundleable="false" exclude="false">
-        <folder name="app" bundleable="false" exclude="false">
-          <folder name="modules" bundleable="false" exclude="false">
-            <folder name="Home" bundleable="false" exclude="false">
+      <folder name="src" bundleable="false">
+        <folder name="app" bundleable="false">
+          <folder name="modules" bundleable="false">
+            <folder name="ECSlider" bundleable="false" exclude="false">
+              <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                <description></description>
+                <altTagCaption></altTagCaption>
+              </file>
+            </folder>
+            <folder name="Home" bundleable="false">
               <file name="homepageSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
                 <description></description>
                 <altTagCaption></altTagCaption>
@@ -46,7 +52,7 @@
             <altTagCaption>macro</altTagCaption>
           </file>
         </folder>
-        <file name="home_alt.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_shiftJis">
+        <file name="home_alt.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
           <description></description>
           <altTagCaption>EC_home_tmpl</altTagCaption>
         </file>

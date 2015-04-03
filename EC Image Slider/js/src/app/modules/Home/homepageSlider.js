@@ -7,21 +7,29 @@ define('SliderImages', function()
 	
 	var SliderImages = {};
 	
+	/*
 	SliderImages.Model = Backbone.Model.extend({
 		parse: function (response)
 		{
-			return response.columns;
+			return response;
 		}
 	});
 	SliderImages.Collection = Backbone.Collection.extend({
-		url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
-	//	url: '/SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=Anime'
+	//	url: '/SCA-Quick-Start/EC-Image-Slider/services/slider-imgs.ss'
+		url: '/SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=Anime'
 	,	model: SliderImages.Model
 	});
+	*/
+	
 	SliderImages.View = Backbone.View.extend({
 		title: 'SliderImages'
 	,	page_header: 'SliderImages'
 	,	template: 'EC_home'
+		
+	,	initialize: function (options) 
+		{
+			console.log('hp init view');
+		}
 	});
 	
 	SliderImages.Router = Backbone.Router.extend({
@@ -40,18 +48,13 @@ define('SliderImages', function()
 		{
 		
 			console.log('customHomePage');
-			var collection = new SliderImages.Collection()
-			,	view = new SliderImages.View({
-					application: this.application
-				,	collection: collection
-				});
-			collection.fetch({
-				success: function ()
-				{
-					console.log();
-					view.showContent();
-				}
+
+			var view = new SliderImages.View({
+				application: this.application
 			});
+			
+			view.showContent();
+			
 		}
 	});
 	
@@ -83,8 +86,9 @@ define('SliderImages', function()
 	if (!window.sliderImagesIncluded)
 	{
 		window.sliderImagesIncluded = true;
-		SC.SliderImagesTemplates.macros = _.union(SC.templates.macros, SC.SliderImagesTemplates.macros);
-		SC.templates = _.extend(SC.templates, SC.SliderImagesTemplates);
+		SC.ECTemplates.macros = _.union(SC.templates.macros, SC.ECTemplates.macros);
+		SC.templates = _.extend(SC.templates, SC.ECTemplates);
+		
 		application.Configuration.modules.push('SliderImages');
 		
 		application.Configuration.navigationTabs.push({
@@ -95,6 +99,9 @@ define('SliderImages', function()
 		,	href: '/slider'
 		,	text: 'Slider'
 		});
-		
+
 	}
+	
+	
+	
 })(SC.Application('Shopping'));

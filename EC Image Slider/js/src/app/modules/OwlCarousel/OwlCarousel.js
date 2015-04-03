@@ -1,4 +1,4 @@
-define('OwlCarousel', function ()
+define('OwlCarousel', ['ECSlider'], function (ECSlider)
 {
 	'use strict';
 
@@ -14,19 +14,14 @@ define('OwlCarousel', function ()
 
 		initialize: function ()
 		{
-
-			console.log('initialize OwlCarousel');
-			
-			this.$slider = this.initSlider();
+			this.ecSliderID = this.options.ecSliderID;
+			this.buildSlides();
 
 			return this;
 		}
 
 	,	initSlider: function ()
 		{
-			console.log('initslider');
-			console.log(this.$target);
-		
 			return this.$target.owlCarousel({
 				loop:true
 			,	autoplay:true
@@ -36,6 +31,30 @@ define('OwlCarousel', function ()
 			,	items:1
 			});
 		}
+	
+	,	buildSlides: function() 
+		{
+			var self = this;
+			var collection = new ECSlider.Collection({id:self.ecSliderID});
+			
+			collection.fetch({
+				success: function ()
+				{
+					_.each(collection.models, function(collectionItem) {
+						self.$target.append(
+							SC.macros.sliderImg(collectionItem)
+						);
+					});
+					
+					self.$slider = self.initSlider();
+
+				}
+			});
+			
+			
+			
+
+		}
 	});
 
 	var OwlCarouselModule = {
@@ -44,18 +63,23 @@ define('OwlCarousel', function ()
 		
 	,	initialize: function (view)
 		{
-			console.log('initialize OwlCarouselModule');
-			view.owlCarousel = new OwlCarouselModule.OwlCarousel({
-				$target: view.$('.owl-carousel') 
-			});
-		
+
+			var ecSliderSelector = '[data-type="ec-slider"]';
+
+			if (view.$(ecSliderSelector).length)
+			{
+				var ecSliderID = jQuery.trim(view.$(ecSliderSelector).attr('data-ec-slider'));
+				
+				view.owlCarousel = new OwlCarouselModule.OwlCarousel({
+					$target: view.$(ecSliderSelector)
+				,	ecSliderID: ecSliderID
+				});				
+			}
+
 		}
 	,	mountToApp: function (application)
 		{
-			
-	
-			application.getLayout().on('afterAppendView', this.initialize);
-			
+			application.getLayout().on('afterAppendView', this.initialize);		
 		}
 			
 	}
