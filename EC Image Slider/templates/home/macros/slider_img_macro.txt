@@ -1,12 +1,7 @@
 <% registerMacro('sliderImg', function (item) { %>
-
-<%
-	console.log(item);
-%>
 <div class="item">
 	<a href="<%= item.get('link') %>">
 		<img src="<%= item.get('imgdesktop') %>" alt="<%= item.get('alttext') %>" /> 
-		
 	</a>
 </div>
 <% }) %>

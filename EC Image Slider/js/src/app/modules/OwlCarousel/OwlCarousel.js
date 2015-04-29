@@ -50,10 +50,6 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 
 				}
 			});
-			
-			
-			
-
 		}
 	});
 
@@ -91,9 +87,7 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 (function(application)
 {
 	'use strict';
-	
-	console.log('OWL');
-	
+
 	application.Configuration.modules.push('OwlCarousel');
 	
 })(SC.Application('Shopping'));

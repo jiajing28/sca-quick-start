@@ -10,19 +10,19 @@
       <folder name="src" bundleable="false">
         <folder name="app" bundleable="false">
           <folder name="modules" bundleable="false">
-            <folder name="ECSlider" bundleable="false" exclude="false">
+            <folder name="ECSlider" bundleable="false">
               <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
                 <description></description>
                 <altTagCaption></altTagCaption>
               </file>
             </folder>
             <folder name="Home" bundleable="false">
-              <file name="homepageSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+              <file name="ECHomepage.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
                 <description></description>
                 <altTagCaption></altTagCaption>
               </file>
             </folder>
-            <folder name="OwlCarousel" bundleable="false" exclude="false">
+            <folder name="OwlCarousel" bundleable="false">
               <file name="OwlCarousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
                 <description></description>
                 <altTagCaption></altTagCaption>

@@ -1,6 +1,6 @@
-document.write('<' + 'script src="SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014c624fc7c2.js"></' + 'script>');
-document.write('<' + 'script src="SCA-Quick-Start/EC-Image-Slider/templates/Templates-014c625014b0.js"></' + 'script>');
-document.write('<' + 'script src="SCA-Quick-Start/EC-Image-Slider/js/Application-014c624fa731.js"></' + 'script>');
+document.write('<' + 'script src="/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014c624fc7c2.js"></' + 'script>');
+document.write('<' + 'script src="/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014c8142cd9e.js"></' + 'script>');
+document.write('<' + 'script src="/SCA-Quick-Start/EC-Image-Slider/js/Application-014c8164f882.js"></' + 'script>');	
 
-document.write('<' + 'link rel="stylesheet" href="SCA-Quick-Start/EC-Image-Slider/skins/Styles-014c624ff0b7.css"/>');
-		
+
+document.write('<' + 'link rel="stylesheet" href="SCA-Quick-Start/EC-Image-Slider/skins/Styles-014c80e4e8ce.css"/>');

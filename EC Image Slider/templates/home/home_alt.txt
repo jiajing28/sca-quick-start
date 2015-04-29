@@ -1,7 +1,4 @@
-<%= breadcrumb({href: '/', text: _('Home').translate()}) %>
-<section>
-	<h1><%= _(view.page_header).translate() %></h1>
-	<div id="home_page_content"></div>
+<section class="homepage-banner">
 	<div class="row-fluid">
 		<div data-type="ec-slider" data-ec-slider="Anime"></div>
 	</div>
