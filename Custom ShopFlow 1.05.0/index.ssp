@@ -64,7 +64,7 @@ if (!SC.isPageGenerator())
 	var pendingScripts = []
 	,	firstScriptTag = !SC.isPageGenerator() && document.getElementsByTagName('script')[0];//document.scripts[0] gives an ugly error in SEO ENGINE and is not used on it.
 
-	window.loadScript = function loadScript(scripts) 
+	window.loadScript = function loadScript(scripts, callback) 
 	{
 		var src
 		,	script;
@@ -152,6 +152,8 @@ if (!SC.isPageGenerator())
 				}
 			}
 		}
+		
+		script.onload = callback;
 	}
 })(); 
 
@@ -221,10 +223,11 @@ if (!SC.isCrossOrigin())
 	loadScript([
 		'<%= session.getAbsoluteUrl("shopping", 'js/libs/Libraries-014c4d649507.js') %>'
 	,	'<%= session.getAbsoluteUrl("shopping", 'templates/Templates-014c4d63fb53.js') %>'
-	//,	'<%= session.getAbsoluteUrl("shopping", 'js/Application-014c5cbcf4dc.js') %>'
-	//,	'/SCA-Quick-Start/EC-Image-Slider/index.ssp'
+	,	'<%= session.getAbsoluteUrl("shopping", 'js/Application-014c5cbcf4dc.js') %>'
+	,	'/SCA-Quick-Start/EC-Image-Slider/index.ssp'
 	//,	'<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>'
-	]);
+	], afterLoad);
+	
 
 	if (SC.ENVIRONMENT.jsEnvironment == 'browser')
 	{
@@ -235,15 +238,19 @@ if (!SC.isCrossOrigin())
 	}
 }
 
-</script>
-<script src='<%= session.getAbsoluteUrl("shopping", 'js/Application-014c5cbcf4dc.js') %>' type="text/javascript"></script>
-<script>
-	if (!SC.isPageGenerator())
+function afterLoad() {
+	if (!SC.isCrossOrigin())
 	{
-		document.write('<' + 'script src="/SCA-Quick-Start/EC-Image-Slider/index.ssp"></' + 'script>');	
+		console.log('afterLoad');
+		loadScript([
+	   		'<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>'
+	   	]);
 	}
+}
+
 </script>
-<script src='<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>' type="text/javascript"></script>
+
+
 <link rel="stylesheet" href="<%= session.getAbsoluteUrl('shopping', 'skins/standard/Styles-014c4d643e26.css') %>">
 </body>
 </html>

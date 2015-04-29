@@ -31,6 +31,8 @@
           </folder>
         </folder>
       </folder>
+      <file name="Starter.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+      <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
     <folder name="services" bundleable="false">
       <file name="ecqsGetSlider.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
@@ -39,11 +41,12 @@
         <altTagCaption></altTagCaption>
       </file>
     </folder>
-    <folder name="skins" bundleable="false" exclude="false">
+    <folder name="skins" bundleable="false">
       <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
         <altTagCaption></altTagCaption>
       </file>
+      <file name="global.css" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
     <folder name="templates" bundleable="false">
       <folder name="home" bundleable="false">

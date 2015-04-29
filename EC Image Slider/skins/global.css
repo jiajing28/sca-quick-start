@@ -1,0 +1,12 @@
+.ec-slider-mobile.owl-carousel.owl-loaded {
+	display:none;
+}
+
+@media screen and (max-width: 768px) {
+	.ec-slider-desktop.owl-carousel.owl-loaded {
+		display:none;
+	}
+	.ec-slider-mobile.owl-carousel.owl-loaded {
+		display:block;
+	}
+}

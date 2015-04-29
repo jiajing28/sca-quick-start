@@ -20,9 +20,9 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 			return this;
 		}
 
-	,	initSlider: function ()
+	,	initSlider: function (target)
 		{
-			return this.$target.owlCarousel({
+			return target.owlCarousel({
 				loop:true
 			,	autoplay:true
 			,	nav:true
@@ -35,19 +35,36 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 	,	buildSlides: function() 
 		{
 			var self = this;
+			var desktopWrapper = self.$target.find('.ec-slider-desktop');
+			var mobileWrapper = self.$target.find('.ec-slider-mobile');
 			var collection = new ECSlider.Collection({id:self.ecSliderID});
+			
+			self.$target.append(desktopWrapper).append(mobileWrapper);
 			
 			collection.fetch({
 				success: function ()
 				{
 					_.each(collection.models, function(collectionItem) {
-						self.$target.append(
-							SC.macros.sliderImg(collectionItem)
-						);
+						if (collectionItem.get('imgdesktop') != '') {
+							desktopWrapper.append(
+								SC.macros.sliderImg(collectionItem, collectionItem.get('imgdesktop'))
+							);
+						}
+						
+						if (collectionItem.get('imgmobile') != '') {
+							mobileWrapper.append(
+								SC.macros.sliderImg(collectionItem, collectionItem.get('imgmobile'))
+							);
+						}
 					});
-					
-					self.$slider = self.initSlider();
 
+					if (desktopWrapper.children().length > 0) {
+						self.initSlider(desktopWrapper);
+					}
+					
+					if (mobileWrapper.children().length > 0) {
+						self.initSlider(mobileWrapper);
+					}
 				}
 			});
 		}
@@ -65,6 +82,9 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 			if (view.$(ecSliderSelector).length)
 			{
 				var ecSliderID = jQuery.trim(view.$(ecSliderSelector).attr('data-ec-slider'));
+				
+				view.$(ecSliderSelector).append('<div class="ec-slider ec-slider-desktop" />');
+				view.$(ecSliderSelector).append('<div class="ec-slider ec-slider-mobile" />');	
 				
 				view.owlCarousel = new OwlCarouselModule.OwlCarousel({
 					$target: view.$(ecSliderSelector)
