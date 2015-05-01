@@ -64,7 +64,7 @@ if (!SC.isPageGenerator())
 	var pendingScripts = []
 	,	firstScriptTag = !SC.isPageGenerator() && document.getElementsByTagName('script')[0];//document.scripts[0] gives an ugly error in SEO ENGINE and is not used on it.
 
-	window.loadScript = function loadScript(scripts, callback) 
+	window.loadScript = function loadScript(scripts) 
 	{
 		var src
 		,	script;
@@ -79,6 +79,8 @@ if (!SC.isPageGenerator())
 			{
 				src = (typeof src === 'string') ? {url: src} : src; 
 
+				//console.log('SC.isPageGenerator ' + SC.isPageGenerator());
+				
 				// fall back to defer. This is the SEO Engine case too
 				if (SC.isPageGenerator()) 
 				{
@@ -153,7 +155,7 @@ if (!SC.isPageGenerator())
 			}
 		}
 		
-		script.onload = callback;
+		//script.onload = callback;
 	}
 })(); 
 
@@ -226,7 +228,7 @@ if (!SC.isCrossOrigin())
 	,	'<%= session.getAbsoluteUrl("shopping", 'js/Application-014c5cbcf4dc.js') %>'
 	,	'/SCA-Quick-Start/EC-Image-Slider/index.ssp'
 	//,	'<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>'
-	], afterLoad);
+	]);
 	
 
 	if (SC.ENVIRONMENT.jsEnvironment == 'browser')

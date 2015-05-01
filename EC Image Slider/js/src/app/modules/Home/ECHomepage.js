@@ -19,7 +19,6 @@ define('ECHomepage', function()
 		routes: {
 			'': 'customHomePage'
 		,	'?*params': 'customHomePage'
-		,	'slider': 'customHomePage'
 		}
 		
 	,	initialize: function (application)
@@ -58,18 +57,9 @@ define('ECHomepage', function()
 		window.ECHomepageIncluded = true;
 		SC.ECTemplates.macros = _.union(SC.templates.macros, SC.ECTemplates.macros);
 		SC.templates = _.extend(SC.templates, SC.ECTemplates);
-		
-		console.log('add ECHomepage module');
+
 		application.Configuration.modules.push('ECHomepage');
-		
-		application.Configuration.navigationTabs.push({		
-			data: {		
-			hashtag: '#/slider'		
-			,	touchpoint: 'home'		
-			}		
-		,	href: '/slider'		
-		,	text: 'Slider'		
-		});
+
 	}
 
 })(SC.Application('Shopping'));

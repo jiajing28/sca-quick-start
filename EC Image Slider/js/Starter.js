@@ -1,6 +1,7 @@
 SC.startShopping = function ()
 {
 	'use strict'; 
+	console.log('Start shopping');
 
 	var application = SC.Application('Shopping');
 
