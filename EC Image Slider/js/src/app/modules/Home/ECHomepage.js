@@ -48,18 +48,14 @@ define('ECHomepage', function()
 	return ECHomepage;
 });
 
-(function(application)
+if (!window.ECHomepageIncluded)
 {
-	'use strict';
-	
-	if (!window.ECHomepageIncluded)
-	{
-		window.ECHomepageIncluded = true;
-		SC.ECTemplates.macros = _.union(SC.templates.macros, SC.ECTemplates.macros);
-		SC.templates = _.extend(SC.templates, SC.ECTemplates);
+	window.ECHomepageIncluded = true;
+	SC.ECTemplates.macros = _.union(SC.templates.macros, SC.ECTemplates.macros);
+	SC.templates = _.extend(SC.templates, SC.ECTemplates);
+}
 
-		application.Configuration.modules.push('ECHomepage');
-
-	}
-
-})(SC.Application('Shopping'));
+if (!SC.ECModules) {
+	SC.ECModules = [];
+}
+SC.ECModules = _.union(SC.ECModules, ['ECHomepage']);

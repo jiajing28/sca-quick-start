@@ -1,5 +1,11 @@
 <project info="SuiteCloud IDE generated file, do not edit." setAttributesOnUpdate="false">
   <folder name="EC Image Slider" bundleable="false">
+    <folder name="install" bundleable="false" exclude="false">
+      <file name="appendQSModules.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <description></description>
+        <altTagCaption></altTagCaption>
+      </file>
+    </folder>
     <folder name="js" bundleable="false">
       <folder name="libs" bundleable="false" exclude="false">
         <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
@@ -31,15 +37,10 @@
           </folder>
         </folder>
       </folder>
-      <file name="Starter.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
     <folder name="services" bundleable="false">
       <file name="ecqsGetSlider.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
-      <file name="slider-imgs.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
-        <description></description>
-        <altTagCaption></altTagCaption>
-      </file>
     </folder>
     <folder name="skins" bundleable="false">
       <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">

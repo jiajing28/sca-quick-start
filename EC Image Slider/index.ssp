@@ -1,14 +1,22 @@
-loadScript([
-	'/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014c624fc7c2.js'
-,	'/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014d06b6446e.js'
-,	'/SCA-Quick-Start/EC-Image-Slider/js/Application-014d0cc0b6df.js'
-]);
-
-
 var head = document.getElementsByTagName("head")[0];
+
+var libScript = document.createElement('script');
+libScript.type ='text/javascript';
+libScript.src= '/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014c624fc7c2.js';
+
+var temScript = document.createElement('script');
+temScript.type ='text/javascript';
+temScript.src= '/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014d06b6446e.js';
+
+var appScript = document.createElement('script');
+appScript.type ='text/javascript';
+appScript.src= '/SCA-Quick-Start/EC-Image-Slider/js/Application-014d11b6cc0d.js';
 
 var link = document.createElement('link');
 link.rel = 'stylesheet';
 link.href = '/SCA-Quick-Start/EC-Image-Slider/skins/Styles-014d06b48605.css';
 
+head.appendChild(libScript);
+head.appendChild(temScript);
+head.appendChild(appScript);
 head.appendChild(link);

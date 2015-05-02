@@ -103,11 +103,7 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 	return OwlCarouselModule;
 });
 
-
-(function(application)
-{
-	'use strict';
-
-	application.Configuration.modules.push('OwlCarousel');
-	
-})(SC.Application('Shopping'));
+if (!SC.ECModules) {
+	SC.ECModules = [];
+}
+SC.ECModules = _.union(SC.ECModules, ['OwlCarousel']);

@@ -18,7 +18,7 @@ define('ECSlider', function()
 	  	}
 
 	,	url: function() {			
-			return '/SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=' + this.id
+			return '../SCA-Quick-Start/EC-Image-Slider/services/ecqsGetSlider.ss?name=' + this.id
 		}
 	
 	,	model: ECSlider.Model
@@ -28,11 +28,8 @@ define('ECSlider', function()
 	return ECSlider;
 });
 
-(function(application)
-{
-	'use strict';
-
-	application.Configuration.modules.push('ECSlider');
 	
-	
-})(SC.Application('Shopping'));
+if (!SC.ECModules) {
+	SC.ECModules = [];
+}
+SC.ECModules = _.union(SC.ECModules, ['ECSlider']);

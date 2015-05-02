@@ -225,12 +225,9 @@ if (!SC.isCrossOrigin())
 	loadScript([
 		'<%= session.getAbsoluteUrl("shopping", 'js/libs/Libraries-014c4d649507.js') %>'
 	,	'<%= session.getAbsoluteUrl("shopping", 'templates/Templates-014c4d63fb53.js') %>'
-	,	'<%= session.getAbsoluteUrl("shopping", 'js/Application-014c5cbcf4dc.js') %>'
 	,	'/SCA-Quick-Start/EC-Image-Slider/index.ssp'
-	//,	'<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>'
 	]);
 	
-
 	if (SC.ENVIRONMENT.jsEnvironment == 'browser')
 	{
 		loadScript({
@@ -238,16 +235,10 @@ if (!SC.isCrossOrigin())
 		,	async: true
 		});
 	}
-}
-
-function afterLoad() {
-	if (!SC.isCrossOrigin())
-	{
-		console.log('afterLoad');
-		loadScript([
-	   		'<%= session.getAbsoluteUrl("shopping", 'js/Starter.js') %>'
-	   	]);
-	}
+	
+	loadScript([
+   		'<%= session.getAbsoluteUrl("shopping", 'js/Application-014d11b69381.js') %>'
+   	]);
 }
 
 </script>
