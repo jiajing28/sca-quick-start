@@ -6,6 +6,7 @@ SC.appendQSModules = function ()
 
 	
 	console.log('beforeSTart');
+	console.log(SC.ECModules);
 	_.each(SC.ECModules, function(module) {
 		appendQSModuleApplication.Configuration.modules.push(module);
 		console.log('append');

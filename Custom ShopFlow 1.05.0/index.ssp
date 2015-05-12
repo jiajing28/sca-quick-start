@@ -218,14 +218,19 @@ if (!SC.isCrossOrigin())
 		SC.ENVIRONMENT.PROFILE = {};
 	}
 
+	loadScript([
+   		'/SCA-Quick-Start/EC-Image-Slider/index.ssp'
+   	
+   	]);
 	
 	
 	// Loads the application files, if you need to have a less agresive cacheing you can move them 
 	// to the sc.environment.ssp (Moderate cacheing) or to the sc.user.environment.ssp (No cache but less performant)
 	loadScript([
-		'<%= session.getAbsoluteUrl("shopping", 'js/libs/Libraries-014c4d649507.js') %>'
-	,	'<%= session.getAbsoluteUrl("shopping", 'templates/Templates-014c4d63fb53.js') %>'
-	,	'/SCA-Quick-Start/EC-Image-Slider/index.ssp'
+		'<%= session.getAbsoluteUrl("shopping", 'js/libs/Libraries-014d203affeb.js') %>'
+	,	'<%= session.getAbsoluteUrl("shopping", 'templates/Templates-014d203b3d82.js') %>'
+	,	'<%= session.getAbsoluteUrl("shopping", 'js/Application-014d4939e722.js') %>'
+	
 	]);
 	
 	if (SC.ENVIRONMENT.jsEnvironment == 'browser')
@@ -235,10 +240,12 @@ if (!SC.isCrossOrigin())
 		,	async: true
 		});
 	}
-	
+	/*
 	loadScript([
-   		'<%= session.getAbsoluteUrl("shopping", 'js/Application-014d11b69381.js') %>'
+   		'<%= session.getAbsoluteUrl("shopping", 'js/Application-014d4939e722.js') %>'
+   	
    	]);
+	*/
 }
 
 </script>

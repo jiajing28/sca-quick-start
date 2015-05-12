@@ -44,6 +44,7 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 			collection.fetch({
 				success: function ()
 				{
+					console.log('collection fetch success');
 					_.each(collection.models, function(collectionItem) {
 						if (collectionItem.get('imgdesktop') != '') {
 							desktopWrapper.append(
@@ -103,7 +104,7 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 	return OwlCarouselModule;
 });
 
-if (!SC.ECModules) {
-	SC.ECModules = [];
-}
-SC.ECModules = _.union(SC.ECModules, ['OwlCarousel']);
+(function(application)
+{
+	application.Configuration.modules.push('OwlCarousel');
+})(SC.Application('Shopping'));

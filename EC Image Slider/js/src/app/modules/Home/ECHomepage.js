@@ -48,14 +48,7 @@ define('ECHomepage', function()
 	return ECHomepage;
 });
 
-if (!window.ECHomepageIncluded)
+(function(application)
 {
-	window.ECHomepageIncluded = true;
-	SC.ECTemplates.macros = _.union(SC.templates.macros, SC.ECTemplates.macros);
-	SC.templates = _.extend(SC.templates, SC.ECTemplates);
-}
-
-if (!SC.ECModules) {
-	SC.ECModules = [];
-}
-SC.ECModules = _.union(SC.ECModules, ['ECHomepage']);
+	application.Configuration.modules.push('ECHomepage');
+})(SC.Application('Shopping'));

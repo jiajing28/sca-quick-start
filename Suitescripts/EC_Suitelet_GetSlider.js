@@ -1,65 +1,58 @@
-function service (request, response)
-{
-	nlapiLogExecution('AUDIT', 'sliderImgs', 'start');
-	
-	var ret = [];
+/**
+ * Company           Explore Consulting
+ * Copyright         2015 Explore Consulting, LLC
+ * Description       Example conversion of the other getslider suitelet to use Explore coding style
+ **/
 
-	var name = request.getParameter('name');
-	nlapiLogExecution('AUDIT', 'sliderImgs', 'name = ' + name);	
-	
-	var filters = [];
-	filters.push(new nlobjSearchFilter( 'name', null, 'is', name ));
-	
-	var columns = [];
-	columns.push(new nlobjSearchColumn('internalid'));
-	
-	var searchResults = new nlapiSearchRecord('customrecord_ecqs_slider', null, filters, columns);
-	if (searchResults.length) {
-		var slider = nlapiLoadRecord('customrecord_ecqs_slider', searchResults[0].getId());
 
-		var sublistName = 'recmach' + 'custrecord_ecqs_slide_parent';
-		var count = slider.getLineItemCount(sublistName);
-		nlapiLogExecution('AUDIT', 'count', count);
+/**
+ * Searches NS for a single slider record by name
+ * @param name name of the record (unique)
+ * @returns internal id of the found record
+ */
+EC.findSliderByName = function (name) {
+    EC.enableLazySearch();
+    // get the first result from the search
+    return EC.createSearch('customrecord_ecqs_slider', [['name', 'is', name]], [['internalid'], ['isinactive']])
+        .nsSearchResult2obj().first();
+};
 
-		for (var i = 1; i <= count; i++ ) {
-			
-			var imgdesktopID = slider.getLineItemValue(sublistName, 'custrecord_ecqs_slide_img_desktop', i);
-			var imgmobileID = slider.getLineItemValue(sublistName, 'custrecord_ecqs_slide_img_mobile', i);
-			
-			//var imgdesktop = slider.getLineItemField(sublistName, 'custrecord_ecqs_slide_img_desktop', i);
-			//var imgmobile = slider.getLineItemField(sublistName, 'custrecord_ecqs_slide_img_mobile', i);;
-			
-			//imgdesktop = imgdesktop.getName();
-			//imgmobile = imgmobile.getName();
-			
-			var imgdesktop = '';
-			var imgmobile = '';
-			
-			if ( imgdesktopID )
-			{
-			         var imageFile = nlapiLoadFile(imgdesktopID);
-			         imgdesktop = imageFile.getURL();
-			}
-			
-			if ( imgmobileID )
-			{
-			         var imageFile = nlapiLoadFile(imgmobileID);
-			         imgmobile = imageFile.getURL();
-			}
-			
-			ret.push({
-				imgdesktop: imgdesktop
-				, imgmobile: imgmobile
-				, alttext: slider.getLineItemValue(sublistName, 'custrecord_ecqs_slide_alt', i)
-				, link: slider.getLineItemValue(sublistName, 'custrecord_ecqs_slide_link', i)
-				, caption: slider.getLineItemValue(sublistName, 'custrecord_ecqs_slider_slide_caption', i)
-			});
-		}
-	}
+EC.onStart = function (request, response) {
+    var name = request.getParameter('name');
+    Log.a('sliderImgs', 'name = ' + name);
 
-	response.setContentType('JSON');
-	
-	nlapiLogExecution('AUDIT', 'sliderImgs', JSON.stringify(ret));	
+    var searchResult = EC.findSliderByName(name);
 
-	response.write(JSON.stringify(ret || []));
-}
+    if (searchResult.isinactive == 'F') {
+        // get the slider with its custom sublist
+        var slider = nsdal.loadObject('customrecord_ecqs_slider', searchResult.internalid, [])
+            .withSublist('recmachcustrecord_ecqs_slide_parent', [ // desired sublist fields
+                'custrecord_ecqs_slide_img_desktop', 'custrecord_ecqs_slide_img_mobile',
+                'custrecord_ecqs_slide_alt', 'custrecord_ecqs_slide_link', 'custrecord_ecqs_slider_slide_caption'
+            ]
+        );
+
+        // turn each parent into a javascript object for the suitelet response
+        var ret = _.map(slider.recmachcustrecord_ecqs_slide_parent, function (p) {
+            var imgdesktopID = p.custrecord_ecqs_slide_img_desktop;
+            var imgmobileID = p.custrecord_ecqs_slide_img_mobile;
+            var imgdesktop = imgdesktopID ? nlapiLoadFile(imgdesktopID).getURL() : '';
+            var imgmobile = imgmobileID ? nlapiLoadFile(imgmobileID).getURL() : '';
+
+            return {
+                imgdesktop: imgdesktop
+                , imgmobile: imgmobile
+                , alttext: p.custrecord_ecqs_slide_alt
+                , link: p.custrecord_ecqs_slide_link
+                , caption: p.custrecord_ecqs_slider_slide_caption
+            }
+        });
+    }
+    response.setContentType('JSON');
+
+    Log.a('sliderImgs', ret);
+
+    response.write(JSON.stringify(ret || []));
+};
+
+Log.AutoLogMethodEntryExit(undefined, false,false,true);

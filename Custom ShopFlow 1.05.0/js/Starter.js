@@ -1,8 +1,7 @@
 SC.startShopping = function ()
 {
 	'use strict'; 
-	console.log('Start shopping');
-
+	
 	var application = SC.Application('Shopping');
 
 	application.getConfig().siteSettings = SC.ENVIRONMENT.siteSettings || {};
@@ -60,7 +59,6 @@ SC.startShopping = function ()
 			// Bootstrap some objects //
 			////////////////////////////
 			
-
 			// Checks for errors in the context
 			if (SC.ENVIRONMENT.contextError)
 			{
@@ -95,8 +93,6 @@ SC.startShopping = function ()
 	}	
 };
 
-
-	
 
 SC.startShopping();
 
