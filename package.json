@@ -1,0 +1,22 @@
+{
+  "name": "sca-quick-start",
+  "version": "1.0.0",
+  "description": "SuiteCommerce Advance Quick Start",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiajing28/sca-quick-start.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jiajing28/sca-quick-start/issues"
+  },
+  "homepage": "https://github.com/jiajing28/sca-quick-start",
+  "dependencies": {
+    "@ec/suitescript": "^7.0.0"
+  }
+}
