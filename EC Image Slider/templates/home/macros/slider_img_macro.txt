@@ -5,7 +5,7 @@
 
 <div class="item">
 	<a href="<%= item.get('link') %>" target="<%= item.get('target') %>">
-		<img src="<%= imageLink %>" alt="<%= item.get('alttext') %>" /> 
+		<img src="<%= imageLink %>" alt="<%= item.get('alttext') %>" data-loader="false" /> 
 	</a>
 </div>
 <% }) %>

@@ -17,8 +17,8 @@ define('ECHomepage', function()
 	
 	ECHomepage.Router = Backbone.Router.extend({
 		routes: {
-			'': 'customHomePage'
-		,	'?*params': 'customHomePage'
+			'ecqs-slider-demo': 'customHomePage'
+		//,	'?*params': 'customHomePage'
 		}
 		
 	,	initialize: function (application)
@@ -51,4 +51,14 @@ define('ECHomepage', function()
 (function(application)
 {
 	application.Configuration.modules.push('ECHomepage');
+	
+	application.Configuration.navigationTabs.push({		
+		data: {		
+			hashtag: '#/ecqs-slider-demo'		
+		,	touchpoint: 'home'		
+		}		
+	,	href: 'ecqs-slider-demo'		
+	,	text: 'ECQS Slider Demo'		
+	});
+	
 })(SC.Application('Shopping'));

@@ -2,4 +2,8 @@
 	<div class="row-fluid">
 		<div data-type="ec-slider" data-ec-slider="Anime"></div>
 	</div>
+	
+	<div class="row-fluid">
+		<div data-type="ec-slider" data-ec-slider="Walking Dead" id="Walking Dead" ></div>
+	</div>
 </section>

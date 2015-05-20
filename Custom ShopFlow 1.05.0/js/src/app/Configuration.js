@@ -518,10 +518,10 @@
 
     ,	cache: {
             // cdn cache duration for content pages. Valid values are 'SHORT', 'MEDIUM', 'LONG'
-            contentPageCdn: 'MEDIUM'
+            contentPageCdn: 'SHORT'
 
             // application cache for content pages - value in seconds and must be between 5 minutes and 2 hours
-        ,	contentPageTtl: 2 * 60 * 60
+        ,	contentPageTtl: 2 * 60 * 3
         }
         
     });
