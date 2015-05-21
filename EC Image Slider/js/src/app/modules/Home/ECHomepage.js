@@ -18,7 +18,6 @@ define('ECHomepage', function()
 	ECHomepage.Router = Backbone.Router.extend({
 		routes: {
 			'ecqs-slider-demo': 'customHomePage'
-		//,	'?*params': 'customHomePage'
 		}
 		
 	,	initialize: function (application)

@@ -6,10 +6,6 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 	{
 		this.options = options;
 		this.$target = options.$target;
-
-		console.log('model');
-		console.log(options);
-		console.log(this.$target.attr('id'));
 		
 		this.initialize();
 	};
@@ -20,9 +16,6 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 		{
 			this.ecSliderID = this.options.ecSliderID;
 			this.$target = this.options.$target;
-			
-			console.log('init');
-			console.log(this.$target.attr('id'));
 			
 			this.buildSlides();
 
@@ -48,14 +41,9 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 			var mobileWrapper = self.$target.find('.ec-slider-mobile');
 			var collection = new ECSlider.Collection({id:self.ecSliderID});
 			
-			//self.$target.append(desktopWrapper).append(mobileWrapper);
-			
-			console.log(self.$target.attr('id'));
-			
 			collection.fetch({
 				success: function ()
 				{
-					console.log('collection fetch success');
 					_.each(collection.models, function(collectionItem) {
 						if (collectionItem.get('imgdesktop') != '') {
 							desktopWrapper.append(
@@ -92,7 +80,7 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 			var ecSliderSelector = '[data-type="ec-slider"]';
 
 			_.each(view.$(ecSliderSelector), function(slider) {
-				console.log(slider);
+
 				var ecSliderID = jQuery.trim(jQuery(slider).attr('data-ec-slider'));
 				
 				jQuery(slider).append('<div class="ec-slider ec-slider-desktop" />');
