@@ -13,66 +13,65 @@
 EC.findAllItemUrlComponent = function () {
     EC.enableLazySearch();
     // get the first result from the search
-    return EC.createSearch('item', [['isonline', 'is', 'T'],'AND',['urlcomponent', 'isnot', '']], [['internalid'], ['urlcomponent']])
-       .nsSearchResult2obj().toArray();
-
-     /*
-    var filters = [];
-    filters.push(new nlobjSearchFilter('isonline', null, 'is', 'T'));
-    filters.push(new nlobjSearchFilter('isinactive', null, 'is', 'F'));
-    filters.push(new nlobjSearchFilter('urlcomponent', null, 'isnot', ''));
-
-    var columns = [];
-    columns.push(new nlobjSearchColumn('urlcomponent'));
-
-    var search = nlapiCreateSearch('item', filters, columns);
-
-    return search.runSearch();
-    */
+    return EC.createSearch('item', [['urlcomponent', 'isnot', '']], [['internalid'], ['urlcomponent']])
+        .nsSearchResult2obj().toArray();
 };
+
+EC.findAllContentDelivery = function () {
+    EC.enableLazySearch();
+
+    var CONST_LANDING_PAGE_TYPE_ID = 1;
+    // get the first result from the search
+    return EC.createSearch('customrecord_ns_cd_query', [['custrecord_ns_cdq_pageid.custrecord_ns_cdp_type', 'is', CONST_LANDING_PAGE_TYPE_ID]], [['custrecord_ns_cdq_query']])
+        .nsSearchResult2obj().toArray();
+};
+
+
 
 EC.onStart = function (request, response) {
 
+    var params = request.getAllParameters();
+    var newUrl = params['url'];
+
     var searchResult = EC.findAllItemUrlComponent();
+    var cdSearchResult = EC.findAllContentDelivery();
 
-    Log.d("search result full", searchResult);
-    /*
-    searchResult.take(100).each(function (result) {
-       Log.d("search result", result);
-    });*/
+    //Log.d("search result full", searchResult);
 
-    _.each(searchResult, function() {
+    //Log.d("search result cd", cdSearchResult);
 
+    var trimmedCDUrls = _.map(_.pluck(cdSearchResult, 'custrecord_ns_cdq_query'), function(url){
+        return url.substring(1);
     });
-    
-/*
-    var filters = [];
-    filters.push(new nlobjSearchFilter('isonline', null, 'is', 'T'));
-    filters.push(new nlobjSearchFilter('isinactive', null, 'is', 'F'));
-    filters.push(new nlobjSearchFilter('urlcomponent', null, 'isnot', ''));
 
-    var columns = [];
-    columns.push(new nlobjSearchColumn('urlcomponent'));
+    //Log.d("trimmedCDUrls", trimmedCDUrls);
 
-    var search = nlapiCreateSearch('item', filters, columns);
+    var urls = _.uniq(_.union(_.pluck(searchResult, 'urlcomponent'), trimmedCDUrls));
 
-    var searchResult = search.runSearch();
+    //Log.d("unique urls", urls);
 
-    var firstHundredResults = searchResult.getResults(0, 99);
-    for (var i = 0; i < firstHundredResults.length; i++) {
-       //var msg = "urlcomponent:" + firstHundredResults[i].getValue("urlcomponent");
-       Log.d("search result", firstHundredResults[i].getValue(columns[0]));
+
+    var isUniqueUrl = _.indexOf(urls, newUrl) < 0;
+
+    if (isUniqueUrl) {
+        var record = nlapiCreateRecord('noninventoryitem');
+        record.setFieldValue( 'urlcomponent', newUrl);
+        record.setFieldValue( 'taxschedule', '1');
+        record.setFieldValue( 'itemid', 'url-' + newUrl);
+        var id = nlapiSubmitRecord(record, true);
+
+        var savedRecord = nlapiLoadRecord('noninventoryitem', id);
+        var savedUrl = savedRecord.getFieldValue('urlcomponent');
+
+        Log.d("savedUrl", savedUrl);
     }
-*/
 
+    //Log.d("isUniqueUrl", isUniqueUrl);
 
-    /*
-    response.setContentType('JSON');
+     response.setContentType('JSON');
 
-    Log.a('sliderImgs', ret);
+     response.write(JSON.stringify(urls || []));
 
-    response.write(JSON.stringify(ret || []));
-    */
 };
 
 Log.AutoLogMethodEntryExit(undefined, false,false,true);
