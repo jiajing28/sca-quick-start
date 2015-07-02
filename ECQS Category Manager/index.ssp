@@ -1,0 +1,15 @@
+<%
+	var Categories = ECQS.getCategories();
+%>
+
+var ECQS = window.ECQS = {};
+
+<% if (Categories) { %>
+	ECQS.categories = <%= JSON.stringify(Categories) %>;
+<% } %>
+
+
+loadScript([
+	'/SCA-Quick-Start/ECQS-Category-Manager/templates/Templates-014e3ce2aa5b.js'
+,	'/SCA-Quick-Start/ECQS-Category-Manager/js/Application-014e321f72c0.js'
+]);
