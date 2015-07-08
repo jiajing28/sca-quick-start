@@ -1,13 +1,21 @@
-<% registerMacro('subcategoryCell', function (id) { %>
+<% registerMacro('subcategoryCell', function (id, view) { %>
 <%
 	var subcategoryModel = _.findWhere(ECQS.categories, {id : id});
+	var application = view.application;
 	console.log('subcat model');
 	console.log(subcategoryModel);
+	
 %>
 
-<div class="category-cell">
-	<div class="category-cell-thumbnail thumbnail">
-		thumbnail?
+<div class="category-cell span3">
+	<div class="category-cell-thumbnail thumbnail">		
+		<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
+			<a href="<%= subcategoryModel.custrecord_ecqs_category_url %>">
+				<img src="<%= subcategoryModel.thumbnail %>"/>
+			</a>
+		<% } else { %>
+			<img src="<%= subcategoryModel.thumbnail %>"/>
+		<% } %>
 	</div>
 	<div class="category-cell-name">
 		<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
