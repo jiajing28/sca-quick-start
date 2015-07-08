@@ -1,7 +1,6 @@
 <%
 	var model = view.model
 	,	catModel = view.catModel
-	,	itemList = view.itemListModel
 	,	items = model.get('items')
 	,	facets = model.get('facets')
 	,	translator = view.translator
@@ -14,46 +13,7 @@
 	console.log(facets);
 	console.log(translator);
 	console.log(view.options.application.getConfig('defaultPaginationSettings'));
-	
-		// Some calls to macros so we have can reuse them
-	var	facetsDisplayResults = facetsDisplay(translator)
 
-	,	itemListSummaryResult = itemListSummary({
-			totalItems: model.get('total')
-		,	currentPage: translator.getOptionValue('page')
-		,	itemsPerPage: translator.getOptionValue('show')
-		})
-
-	,	paginationResult = pagination(_.extend({}, view.options.application.getConfig('defaultPaginationSettings'), {
-			currentPage: translator.getOptionValue('page')
-		,	totalPages: view.totalPages
-		,	extraClass: 'pagination-small pull-right'
-		,	pager: function (page) {
-				return translator.cloneForOption('page', page).getUrl();
-			}
-		}))
-
-	,	itemListDisplaySelectorResult = itemListDisplaySelector({
-			translator: translator
-		,	classes: 'pull-right'
-		,	options: view.options.application.getConfig('itemsDisplayOptions')
-		})
-
-	,	itemListSortSelectorResult = itemListSortSelector({
-			translator: translator
-		,	options: view.options.application.getConfig('sortOptions')
-		})
-
-	,	itemListShowSelectorResult = itemListShowSelector({
-			translator: translator
-		,	options: view.options.application.getConfig('resultsPerPage')
-		})
-
-	,	page_header = _(view.page_header).substitute({
-			itemscount: model.get('total')
-		})
-
-	,	collapse_header = view.collapsable_elements['facet-header'].collapsed;
 	
 %>
 <div data-cms-area="item_list_banner" data-cms-area-filters="page_type"></div>
@@ -64,7 +24,9 @@
 	<nav class="span3">
 		<div data-cms-area="facet_navigation_top" data-cms-area-filters="page_type"></div>
 		<%= navSubcategories(view) %>
-		<%= facetedNavigation(view) %>
+		<% if (items) { %>
+			<%= facetedNavigation(view) %>
+		<% } %>
 		<div data-cms-area="facet_navigation_bottom" data-cms-area-filters="page_type"></div>
 	</nav>
 	<div id="category-content-body" class="span9">
@@ -88,28 +50,52 @@
 			<div data-type="merchandising-zone" data-id="<%= catModel.custrecord_ecqs_category_merch_rule ? catModel.custrecord_ecqs_category_merch_rule.name : '' %>"></div>
 		<% } %> 
 		
-		<% if (itemList) { %>
-			<h3>Item List</h3>
-			<section id="item-list-container" class="item-list-container">
-				<div id="item-list" class="item-list">
-					<%
-						var displayOption = _.find(view.options.application.getConfig('itemsDisplayOptions'), function (option)
-							{
-								return option.id === view.options.translator.getOptionValue('display');
-							})
-						,	cellWrap = function cellWrap (item)
-							{
-								return SC.macros[displayOption.macro](item, view);
-							};
-					%>
-					<%= displayInRows(itemList.models, cellWrap, displayOption.columns) %>
-				
-					<div class="clearfix"></div>
-				</div>
-			</section>
-		<% } %> 
+
+		<section id="item-list-container" class="item-list-container" data-type="custom-item-list"></section>
+
 		
 		<% if (items) { %>
+			<%
+			// Some calls to macros so we have can reuse them
+			var	facetsDisplayResults = facetsDisplay(translator)
+		
+			,	itemListSummaryResult = itemListSummary({
+					totalItems: model.get('total')
+				,	currentPage: translator.getOptionValue('page')
+				,	itemsPerPage: translator.getOptionValue('show')
+				})
+		
+			,	paginationResult = pagination(_.extend({}, view.options.application.getConfig('defaultPaginationSettings'), {
+					currentPage: translator.getOptionValue('page')
+				,	totalPages: view.totalPages
+				,	extraClass: 'pagination-small pull-right'
+				,	pager: function (page) {
+						return translator.cloneForOption('page', page).getUrl();
+					}
+				}))
+		
+			,	itemListDisplaySelectorResult = itemListDisplaySelector({
+					translator: translator
+				,	classes: 'pull-right'
+				,	options: view.options.application.getConfig('itemsDisplayOptions')
+				})
+		
+			,	itemListSortSelectorResult = itemListSortSelector({
+					translator: translator
+				,	options: view.options.application.getConfig('sortOptions')
+				})
+		
+			,	itemListShowSelectorResult = itemListShowSelector({
+					translator: translator
+				,	options: view.options.application.getConfig('resultsPerPage')
+				})
+		
+			,	page_header = _(view.page_header).substitute({
+					itemscount: model.get('total')
+				})
+		
+			,	collapse_header = view.collapsable_elements['facet-header'].collapsed;
+			%>
 			<h3>Facet Items</h3>
 			<header>
 				<div class="facet-header <%= collapse_header ? 'well' : 'facet-header-white-well' %> row-fluid control-group" data-type="accordion">

@@ -10,7 +10,7 @@
 <div class="category-cell span3">
 	<div class="category-cell-thumbnail thumbnail">		
 		<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
-			<a href="<%= subcategoryModel.custrecord_ecqs_category_url %>">
+			<a href="/<%= subcategoryModel.custrecord_ecqs_category_url %>">
 				<img src="<%= subcategoryModel.thumbnail %>"/>
 			</a>
 		<% } else { %>
@@ -19,7 +19,7 @@
 	</div>
 	<div class="category-cell-name">
 		<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
-			<a href="<%= subcategoryModel.custrecord_ecqs_category_url %>">
+			<a href="/<%= subcategoryModel.custrecord_ecqs_category_url %>">
 				<%= subcategoryModel.name %>
 			</a>
 		<% } else { %>

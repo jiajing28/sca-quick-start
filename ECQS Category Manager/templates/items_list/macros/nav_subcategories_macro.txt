@@ -17,7 +17,7 @@
 				<% var subcategoryModel = _.findWhere(ECQS.categories, {id : subcategory.iddisp}); %>
 				<li>			
 					<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
-						<a href="<%= subcategoryModel.custrecord_ecqs_category_url %>"><%= subcategoryModel.name %></a>
+						<a href="/<%= subcategoryModel.custrecord_ecqs_category_url %>"><%= subcategoryModel.name %></a>
 					<% } else { %>
 						<%= subcategoryModel.name %>
 					<% } %>

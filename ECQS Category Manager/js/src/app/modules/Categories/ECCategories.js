@@ -16,46 +16,60 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			this.translatorConfig = application.translatorConfig;
 		}
 		
-	,	ecCategoryByUrl: function () {
+	,	ecCategoryByUrl: function () 
+		{
 			console.log('ecCategoryByUrl');
-			var url = Backbone.history.getFragment()
+			var self= this
+			,	url = Backbone.history.getFragment()
+			,	defaultTranslator = FacetHelper.parseUrl(Backbone.history.getFragment(), this.translatorConfig)
 			,	urlArray = url.split("/")
-			,	category = urlArray[0];
+			,	category = urlArray[0].split("?")[0];
 				
 			urlArray.splice(0,1);
-			console.log(urlArray);
+			//console.log(urlArray);
+			
+			console.log(FacetHelper.parseUrl(Backbone.history.getFragment(), this.translatorConfig));
 
-			var	translator = FacetHelper.parseUrl(urlArray.join("/"), this.translatorConfig)
+			//var	translator = FacetHelper.parseUrl(urlArray.join("/"), this.translatorConfig)
+			var translator = FacetHelper.parseUrl(Backbone.history.getFragment(), this.translatorConfig)
 			,	currCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : category}) || [];
-
-			var testTranslator = FacetHelper.parseUrl(currCategory.custrecord_ecqs_category_facet, this.translatorConfig);
 			
-			translator = translator.cloneForFacetId('category', category)
+			//translator.options = defaultTranslator.options;
+			//translator = translator.cloneForFacetId('category', category)
 			
-			console.log(url);
+			//console.log(url);
 			console.log('category = ' + category);
 			console.log(translator);
 			
 			
 			
-			var itemListModel = new FacetModel()
-			,	model = new FacetModel()
+			var model = new FacetModel()
 			,	view = new ECCategories.View({
 					catModel: currCategory
 				,	translator: translator
 				,	translatorConfig: this.translatorConfig
 				,	application: this.application
-				,	itemListModel: itemListModel
 				,	model: model
 			});
 			
 			if (currCategory.custrecord_ecqs_category_facet) {
 				
+				var facetTranslator = FacetHelper.parseUrl(currCategory.custrecord_ecqs_category_facet, this.translatorConfig);
+				
+				_.each(facetTranslator.facets, function(facet) {
+					console.log('facet');
+					console.log(facet);
+					translator = translator.cloneForFacetId(facet.id, facet.value);
+				});
+				
 				console.log('testTranslator');
-				console.log(testTranslator);
+				console.log(facetTranslator);
+				console.log(translator);
+				
+				var modelTranslator = translator.cloneWithoutFacetId('category');
 				
 				model.fetch({
-					data: testTranslator.getApiParams()
+					data: modelTranslator.getApiParams()
 					,	killerId: this.application.killerId
 					,	pageGeneratorPreload: true }).then(function (data) {
 
@@ -78,15 +92,31 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 						}
 						else
 						{
-							testTranslator.setLabelsFromFacets(model.get('facets') || []);
+							translator.setLabelsFromFacets(model.get('facets') || []);
 							view.showContent();
+							self.getItemListModel(currCategory, translator, view);
 						}
 				});
 				
-			} 
+			} else {
+				view.showContent();
+				
+				self.getItemListModel(currCategory, translator, view);
+				
+			}
+			
+			
+			
+			
+		}
+	
+	,	getItemListModel: function(currCategory, translator, view) 
+		{
 			
 			if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
-
+				
+				var itemListModel = new FacetModel();
+	
 				var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
 					return val.custrecord_ecqs_catitem_item.internalid;
 				}).join();
@@ -94,67 +124,22 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				var modelData = translator.getApiParams();
 				modelData.id = ids; 		// max 10 ids per call
 				modelData = _.omit(modelData, 'category');
-
+		
 				console.log('modelData');
 				console.log(modelData);
 				itemListModel.fetch({
 					data: modelData
 				,	killerId: this.application.killerId
 				,	pageGeneratorPreload: true }).then(function (data) {
-
+		
 					console.log('model data');
 					console.log(data);
 					
-					if (data.corrections && data.corrections.length > 0)
-					{
-						var unaliased_url = self.unaliasUrl(url, data.corrections);
-
-						if (SC.ENVIRONMENT.jsEnvironment === 'server')
-						{			
-							nsglobal.statusCode = 301;
-							nsglobal.location = '/' + unaliased_url;
-						}
-						else
-						{
-							Backbone.history.navigate('#' + unaliased_url, {trigger: true});
-						}
-					}
-					else
-					{
-						//translator.facets = [];
-						
-						translator.setLabelsFromFacets(model.get('facets') || []);
-						
-						/*
-						var categoryFacet = '';
-						
-						translator.facets = _.filter(translator.facets, function(facet) {
-							var id = facet.id
-							,	found = _.where(translator.facetsLabels, {id:id}).length > 0;
-
-							if (!found) {
-								categoryFacet = facet.url;
-							}
-							return found;
-						});
-						
-						view.translator = translator.cloneForFacetId('category', categoryFacet)
-						*/
-						console.log(' new translator');
-						
-						console.log(translator);
-						
-						//view.showContent();
-					}
+					view.appendItemList(itemListModel);
+					
 				});		
-			} else {
-				view.showContent();
 			}
-			
-			
-			
-		}
-	
+		} 
 	});
 	
 	ECCategories.View = Backbone.View.extend({
@@ -166,7 +151,6 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 		{
 			this.application = options.application;
 			this.catModel = options.catModel;
-			this.itemListModel = options.itemListModel;
 			this.translator = options.translator;
 			this.title = this.catModel.name;
 			this.page_header = this.catModel.name;
@@ -293,9 +277,10 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 	,	renderFacets: function (url)
 		{
 			var self = this
-			,	translator = FacetHelper.parseUrl(url, this.options.translatorConfig)
-			,	facets = this.model.get('facets');
+			,	translator = this.translator
+			,	facets = this.model.get('facets') || [];
 	
+		
 			this.$('div[data-type="facet"]').each(function (i, nav)
 			{
 				var $nav = jQuery(nav).empty()
@@ -332,6 +317,7 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 	
 				$nav.append( content );
 			});
+			
 	
 			this.$('[data-toggle="collapse"]').each(function (index, collapser)
 			{
@@ -502,6 +488,29 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			this.statuses[holder_html_id][facet_id][type] = !is_open;
 		}
 
+	,	appendItemList:function(itemListModel) 
+		{
+			var self = this;
+			var displayOption = _.find(this.application.getConfig('itemsDisplayOptions'), function (option)
+			{
+				return option.id === self.translator.getOptionValue('display');
+			})
+		,	cellWrap = function cellWrap (item)
+			{
+				return SC.macros[displayOption.macro](item, self);
+			};
+	
+			this.$('section[data-type="custom-item-list"]').each(function (i, div)
+			{
+				console.log('append custom item list');
+				console.log(itemListModel);
+
+				var $div = jQuery(div).empty();
+				console.log($div);
+				console.log(itemListModel.get('items').models);
+				$div.append( SC.macros['displayInRows'](itemListModel.get('items').models, cellWrap, displayOption.columns) );
+			});
+		}
 
 	});
 	
@@ -514,9 +523,9 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			
 			
 			var query = ''
-			,	categoryUrls = _.pluck(ECQS.categories, 'custrecord_ecqs_category_url');
+			,	categoryUrls = _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'));
 			console.log('ECCategories afterModulesLoaded');
-			console.log(categoryUrls);
+			//console.log(categoryUrls);
 			
 			
 			
@@ -551,26 +560,17 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				ECCategories.Router.prototype.routes[category_page + '?*options'] = 'ecCategoryByUrl';
 				ECCategories.Router.prototype.routes[category_page] = 'ecCategoryByUrl';
 				//ECCategories.Router.prototype.routes[new RegExp(facet_regex)] = 'ecCategoryByUrl';
-				console.log(new RegExp(facet_regex));
+				//console.log(new RegExp(facet_regex));
 				routerInstance.route(new RegExp(facet_regex), 'ecCategoryByUrl');
 
 			});
-			
-			
-			 
-			
-			
-			//routerInstance.route(new RegExp(facet_regex), 'ecCategoryByUrl');
 
-			console.log('routerInstance');
-			console.log(routerInstance);
-			//Facets.prepareRouter(application, routerInstance);
-			//console.log(routerInstance);
 			return routerInstance;
 		});
 		
 		
 		FacetTranslator.prototype.getUrl = function () {
+			console.log('NEW GET URL');
 		    // new code	
 			var url = ''
 			,	self = this;
@@ -598,9 +598,11 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			{
 				url = self.configuration.facetDelimiters.betweenDifferentFacets + category_string;
 			}
-
-			var facetsNoCategory = _.filter(this.facets, function(facet){ return facet.id != 'category'; });
+			console.log(this);
+			console.log('category_string = ' + category_string);
 			
+			var facetsNoCategory = _.filter(this.facets, function(facet){ return facet.id != 'category'; });
+			console.log(facetsNoCategory);
 			// Encodes the other Facets
 			var sorted_facets = _.sortBy(facetsNoCategory, 'url');
 			for (var i = 0; i < sorted_facets.length; i++)
@@ -678,6 +680,99 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			url += (tmp_options_vals.length) ? this.configuration.facetDelimiters.betweenFacetsAndOptions + tmp_options_vals.join(this.configuration.facetDelimiters.betweenDifferentOptions) : '';
 
 			return _(url).fixUrl();
+		}
+		
+		
+		
+		FacetTranslator.prototype.parseUrl = function (url) {
+			
+			console.log('parseUrl');
+			// We remove a posible 1st / (slash)
+			url = (url[0] === '/') ? url.substr(1) : url;
+
+			// given an url with options we split them into 2 strings (options and facets)
+			var facets_n_options = url.split(this.configuration.facetDelimiters.betweenFacetsAndOptions)
+			,	facets = (facets_n_options[0] && facets_n_options[0] !== this.configuration.fallbackUrl) ? facets_n_options[0] : ''
+			,	options = facets_n_options[1] || '';
+
+			console.log(this.getFacetConfig('category'));
+			// We treat category as the 1st unmaned facet filter, so if you are using categories
+			// we will try to take that out by comparig the url with the category tree
+			if (this.getFacetConfig('category'))
+			{
+				var tokens = facets && facets.split('/') || [];
+
+				if (tokens.length && tokens[0] === '')
+				{
+					tokens.shift();
+				}
+				console.log('tokens');
+				console.log(tokens);
+				var branch = []
+				,	slice = {categories: _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))};
+				
+				for (var i = 0; i < tokens.length; i++)
+				{
+					var current_token = tokens[i];
+					
+					console.log('slice.categories');
+					console.log(slice.categories);
+					console.log(slice.categories[current_token]);
+					
+					if (slice.categories && _.indexOf(slice.categories, current_token) > -1)
+					{
+						
+						console.log('branch');
+						
+						
+						branch.push(current_token);
+						//slice = slice.categories[current_token];
+						
+						console.log(branch);
+					}
+					else
+					{
+						break;
+					}
+				}
+				
+				var categories = branch || [];
+				console.log('categories');
+				console.log(facets);		// this returns all facets
+				console.log(categories);
+
+				if (categories && categories.length)
+				{
+					// We set the value for this facet
+					var category_string = categories.join('/');
+					this.parseFacet('category', category_string);
+
+					// And then we just take it out so other posible facets are computed
+					facets = facets.replace(category_string, '');
+				}
+
+				// We remove a posible 1st / (slash) (again, it me be re added by taking the category out)
+				facets = (facets[0] === '/') ? facets.substr(1) : facets;
+			}
+
+			// The facet part of the url gets splited and computed by pairs
+			var facet_tokens = facets.split(new RegExp('[\\'+ this.configuration.facetDelimiters.betweenDifferentFacets +'\\'+ this.configuration.facetDelimiters.betweenFacetNameAndValue +']+', 'ig'));
+			while (facet_tokens.length > 0)
+			{
+				this.parseUrlFacet(facet_tokens.shift(), facet_tokens.shift());
+			}
+
+			// The same for the options part of the url
+			var options_tokens = options.split(new RegExp('[\\'+ this.configuration.facetDelimiters.betweenOptionNameAndValue +'\\'+ this.configuration.facetDelimiters.betweenDifferentOptions +']+', 'ig'))
+			,	tmp_options = {};
+
+			while (options_tokens.length > 0)
+			{
+				tmp_options[options_tokens.shift()] = options_tokens.shift();
+			}
+
+			this.parseUrlOptions(tmp_options);
+			
 		}
 	};
 	
