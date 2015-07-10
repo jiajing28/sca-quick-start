@@ -1,15 +1,11 @@
-<% registerMacro('navSubcategories', function (view) { %>
+<% registerMacro('navSubcategories', function (view, subcategories) { %>
 <%
-	var translator = view.translator
-	,	model = view.model
-	,	catModel = view.catModel
-	,	subcategories = catModel.recmachcustrecord_ecqs_category_parent || null
-	,	has_subcategories = subcategories && subcategories.length > 0;
+	var has_subcategories = subcategories && subcategories.length > 0;
 %>
 <% if (has_subcategories) { %>
 <div class="well faceted-navigation">
 	<div class="well-header facet-list-header">
-		<%= _(view.title).translate() %>
+		<%= _(view.catModel.name).translate() %>
 	</div>
 	<div class="well-body">
 		<ul>

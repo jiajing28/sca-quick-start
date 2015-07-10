@@ -4,7 +4,8 @@
 	,	items = model.get('items')
 	,	facets = model.get('facets')
 	,	translator = view.translator
-	,	subcategories = catModel.recmachcustrecord_ecqs_category_parent || null;
+	,	subcategories = catModel.recmachcustrecord_ecqs_category_parent || null
+	,	cellTemplate = catModel.custrecord_ecqs_category_tmpl_cell.name;
 	
 	console.log('facet_browse');
 	console.log(view);
@@ -12,8 +13,9 @@
 	console.log(items);
 	console.log(facets);
 	console.log(translator);
+	console.log('cellTemplate = ' + cellTemplate);
 	console.log(view.options.application.getConfig('defaultPaginationSettings'));
-
+	
 	
 %>
 <div data-cms-area="item_list_banner" data-cms-area-filters="page_type"></div>
@@ -23,7 +25,7 @@
 <div class="row-fluid view-body" itemscope itemtype="http://schema.org/ItemList">
 	<nav class="span3">
 		<div data-cms-area="facet_navigation_top" data-cms-area-filters="page_type"></div>
-		<%= navSubcategories(view) %>
+		<%= navSubcategories(view, subcategories) %>
 		<% if (items) { %>
 			<%= facetedNavigation(view) %>
 		<% } %>
@@ -31,10 +33,12 @@
 	</nav>
 	<div id="category-content-body" class="span9">
 		<meta itemprop="name" content="<%- view.getTitle() %>">
+		<h1><%= catModel.name %></h1>
 		<div id="banner-section-top" class="content-banner banner-section-top" data-cms-area="item_list_banner_top" data-cms-area-filters="path"></div>
-		
+		<div id="ecqs-category-banner" class="content-banner banner-section-top">
+			<%= catModel.custrecord_ecqs_category_banner %>
+		</div>
 		<% if (subcategories && subcategories.length) { %>
-			<h3>Subcategories</h3>
 			<section id="category-list-container" class="category-list-container">
 				<div class="row-fluid">
 					<div class="span12">
@@ -54,18 +58,24 @@
 		<section id="item-list-container" class="item-list-container" data-type="custom-item-list"></section>
 
 		
-		<% if (items) { %>
+		<% 
+			if (SC.macros[cellTemplate] && items) {
+				SC.macros[cellTemplate](view, model);
+			} 
+		%>
+		
+		<% if (items && items.length > 0) { %>
 			<%
 			// Some calls to macros so we have can reuse them
-			var	facetsDisplayResults = facetsDisplay(translator)
+			var	facetsDisplayResults = SC.macros.facetsDisplay(translator)
 		
-			,	itemListSummaryResult = itemListSummary({
+			,	itemListSummaryResult = SC.macros.itemListSummary({
 					totalItems: model.get('total')
 				,	currentPage: translator.getOptionValue('page')
 				,	itemsPerPage: translator.getOptionValue('show')
 				})
-		
-			,	paginationResult = pagination(_.extend({}, view.options.application.getConfig('defaultPaginationSettings'), {
+		 
+			,	paginationResult = SC.macros.pagination(_.extend({}, view.options.application.getConfig('defaultPaginationSettings'), {
 					currentPage: translator.getOptionValue('page')
 				,	totalPages: view.totalPages
 				,	extraClass: 'pagination-small pull-right'
@@ -74,18 +84,18 @@
 					}
 				}))
 		
-			,	itemListDisplaySelectorResult = itemListDisplaySelector({
+			,	itemListDisplaySelectorResult = SC.macros.itemListDisplaySelector({
 					translator: translator
 				,	classes: 'pull-right'
 				,	options: view.options.application.getConfig('itemsDisplayOptions')
 				})
 		
-			,	itemListSortSelectorResult = itemListSortSelector({
+			,	itemListSortSelectorResult = SC.macros.itemListSortSelector({
 					translator: translator
 				,	options: view.options.application.getConfig('sortOptions')
 				})
 		
-			,	itemListShowSelectorResult = itemListShowSelector({
+			,	itemListShowSelectorResult = SC.macros.itemListShowSelector({
 					translator: translator
 				,	options: view.options.application.getConfig('resultsPerPage')
 				})
@@ -169,7 +179,7 @@
 			</div>
 			<!-- /Item List -->
 		<% } %> 
-		
+
 	</div>
 </div>
 

@@ -1,4 +1,4 @@
-define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.Model', 'Facets.Views'], function (Facets, FacetTranslator, FacetHelper, FacetModel, FacetViews)
+define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.Model', 'Facets.Views', 'ItemsKeyMapping'], function (Facets, FacetTranslator, FacetHelper, FacetModel, FacetViews, itemsKeyMapping)
 {
 	'use strict';
 	
@@ -94,14 +94,13 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 						{
 							translator.setLabelsFromFacets(model.get('facets') || []);
 							view.showContent();
-							self.getItemListModel(currCategory, translator, view);
 						}
 				});
 				
 			} else {
 				view.showContent();
 				
-				self.getItemListModel(currCategory, translator, view);
+				
 				
 			}
 			
@@ -109,37 +108,6 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			
 			
 		}
-	
-	,	getItemListModel: function(currCategory, translator, view) 
-		{
-			
-			if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
-				
-				var itemListModel = new FacetModel();
-	
-				var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
-					return val.custrecord_ecqs_catitem_item.internalid;
-				}).join();
-				
-				var modelData = translator.getApiParams();
-				modelData.id = ids; 		// max 10 ids per call
-				modelData = _.omit(modelData, 'category');
-		
-				console.log('modelData');
-				console.log(modelData);
-				itemListModel.fetch({
-					data: modelData
-				,	killerId: this.application.killerId
-				,	pageGeneratorPreload: true }).then(function (data) {
-		
-					console.log('model data');
-					console.log(data);
-					
-					view.appendItemList(itemListModel);
-					
-				});		
-			}
-		} 
 	});
 	
 	ECCategories.View = Backbone.View.extend({
@@ -151,6 +119,7 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 		{
 			this.application = options.application;
 			this.catModel = options.catModel;
+			this.itemListModel = options.itemListModel;
 			this.translator = options.translator;
 			this.title = this.catModel.name;
 			this.page_header = this.catModel.name;
@@ -181,8 +150,6 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			
 			
 			for (var i = 1; i <= 5; i++) {
-				console.log(this.catModel['custrecord_ecqs_category_crumb_'+i]);
-				console.log(this.catModel['custrecord_ecqs_category_crumb_1']);
 				if (this.catModel['custrecord_ecqs_category_crumb_'+i]) {
 					var categoryId = this.catModel['custrecord_ecqs_category_crumb_'+i].internalid;
 					var breadcrumbCat = _.findWhere(ECQS.categories, {id : categoryId});
@@ -208,7 +175,8 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				{
 					console.log('cat');
 					console.log(cat);
-					category_path += '/'+cat;
+					//category_path += '/'+cat;
+					category_path = '/'+cat;
 	
 					var thisCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : cat }) 
 					
@@ -266,8 +234,50 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			{
 				// Looks for placeholders and injects the facets
 				self.renderFacets(self.translator.getUrl());
+				
+				self.getItemListModel(self.catModel);
 			});
 		}
+	
+	,	getItemListModel: function(currCategory) 
+		{
+			console.log('getItemListModel');
+			console.log(currCategory);
+			var self = this;
+			if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
+				
+				var itemListModel = new FacetModel();
+				
+				//console.log('itemListModel');
+				//console.log(itemListModel);
+	
+				var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
+					return val.custrecord_ecqs_catitem_item.internalid;
+				}).join();
+				
+				var modelData = self.translator.getApiParams();
+				modelData.id = ids; 		// max 10 ids per call
+				modelData = _.omit(modelData, 'category');
+		
+				console.log('modelData');
+				console.log(modelData);
+				itemListModel.fetch({
+					data: modelData
+				,	killerId: this.application.killerId
+				,	pageGeneratorPreload: true }).then(function (data) {
+		
+					console.log('model data');
+					console.log(data);
+
+					//self.itemListModel = itemListModel;
+					//itemsKeyMapping.getKeyMapping(self.application);
+					//console.log(self.application.getConfig('itemKeyMapping', {}));
+					
+					self.appendItemList(itemListModel);
+					
+				});		
+			}
+		} 
 	
 
 		// view.renderFacets:
@@ -490,26 +500,44 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 
 	,	appendItemList:function(itemListModel) 
 		{
+			console.log('append custom item list');
+			
 			var self = this;
+			//var itemListModel = self.itemListModel;
+			var cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name;
+			
 			var displayOption = _.find(this.application.getConfig('itemsDisplayOptions'), function (option)
 			{
 				return option.id === self.translator.getOptionValue('display');
 			})
-		,	cellWrap = function cellWrap (item)
+			,	cellWrap = function cellWrap (item)
 			{
 				return SC.macros[displayOption.macro](item, self);
 			};
-	
-			this.$('section[data-type="custom-item-list"]').each(function (i, div)
-			{
-				console.log('append custom item list');
-				console.log(itemListModel);
-
-				var $div = jQuery(div).empty();
-				console.log($div);
-				console.log(itemListModel.get('items').models);
-				$div.append( SC.macros['displayInRows'](itemListModel.get('items').models, cellWrap, displayOption.columns) );
-			});
+			
+			if (itemListModel.get('items')) {
+				this.$('section[data-type="custom-item-list"]').each(function (i, div)
+				{
+					var $div = jQuery(div).empty();
+					console.log($div);
+					console.log(itemListModel.get('items').models);
+					
+					if (SC.macros[cellTemplate]) {
+						$div.append( SC.macros[cellTemplate](self, itemListModel));
+					} else {
+			
+						console.log(itemListModel);
+						
+						
+						$div.append( SC.macros['displayInRows'](itemListModel.get('items').models, cellWrap, displayOption.columns) );
+				
+						
+					}
+					
+				});
+			}
+			
+			
 		}
 
 	});
@@ -567,7 +595,6 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 
 			return routerInstance;
 		});
-		
 		
 		FacetTranslator.prototype.getUrl = function () {
 			console.log('NEW GET URL');
@@ -695,7 +722,7 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			,	facets = (facets_n_options[0] && facets_n_options[0] !== this.configuration.fallbackUrl) ? facets_n_options[0] : ''
 			,	options = facets_n_options[1] || '';
 
-			console.log(this.getFacetConfig('category'));
+			//console.log(this.getFacetConfig('category'));
 			// We treat category as the 1st unmaned facet filter, so if you are using categories
 			// we will try to take that out by comparig the url with the category tree
 			if (this.getFacetConfig('category'))
@@ -706,8 +733,8 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				{
 					tokens.shift();
 				}
-				console.log('tokens');
-				console.log(tokens);
+				//console.log('tokens');
+				//console.log(tokens);
 				var branch = []
 				,	slice = {categories: _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))};
 				
@@ -715,20 +742,20 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				{
 					var current_token = tokens[i];
 					
-					console.log('slice.categories');
-					console.log(slice.categories);
-					console.log(slice.categories[current_token]);
+					//console.log('slice.categories');
+					//console.log(slice.categories);
+					//console.log(slice.categories[current_token]);
 					
 					if (slice.categories && _.indexOf(slice.categories, current_token) > -1)
 					{
 						
-						console.log('branch');
+						//console.log('branch');
 						
 						
 						branch.push(current_token);
 						//slice = slice.categories[current_token];
 						
-						console.log(branch);
+						//console.log(branch);
 					}
 					else
 					{
@@ -737,9 +764,9 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				}
 				
 				var categories = branch || [];
-				console.log('categories');
-				console.log(facets);		// this returns all facets
-				console.log(categories);
+				//console.log('categories');
+				//console.log(facets);		// this returns all facets
+				//console.log(categories);
 
 				if (categories && categories.length)
 				{
@@ -782,23 +809,5 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 (function(application)
 {
 	application.Configuration.modules.push('ECCategories');
-	
-	application.Configuration.navigationTabs.push({		
-		data: {		
-			hashtag: '#/category-1'		
-		,	touchpoint: 'home'		
-		}		
-	,	href: 'category-1'		
-	,	text: 'ECQS Category Demo'		
-	});
-	
-	if (!window.ECCategoryIncluded)
-	{
-		window.ECCategoryIncluded = true;
-		SC.ECCatTemplates.macros = _.union(SC.templates.macros, SC.ECCatTemplates.macros);
-		SC.templates = _.extend(SC.templates, SC.ECCatTemplates);
-		
-		SC.compileMacros(SC.templates.macros);
-	}
-	
+
 })(SC.Application('Shopping'));
