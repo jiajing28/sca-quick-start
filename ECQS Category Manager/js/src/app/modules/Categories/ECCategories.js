@@ -1,3 +1,33 @@
+/**
+*  Give backbone an easier way to access super properties and methods.
+*/
+Backbone.View.prototype.parent = Backbone.Model.prototype.parent = Backbone.Collection.prototype.parent = function(attribute, options) {
+  
+  /**
+  *  Call this inside of the child initialize method.  If it's a view, it will extend events also.
+  *  this.parent('inherit', this.options);  <- A views params get set to this.options
+  */
+  if(attribute == "inherit") {
+    this.parent('initialize', options); // passes this.options to the parent initialize method
+    
+    //extends child events with parent events
+    if(this.events) { _.extend(this.events, this.parent('events')); this.delegateEvents(); }
+    
+    return;
+  }
+  
+  /**
+  *  Call other parent methods and attributes anywhere else.
+  *  this.parent('parentMethodOrOverriddenMethod', params) <- called anywhere or inside overridden method
+  *  this.parent'parentOrOverriddenAttribute') <- call anywhere
+  */		
+  return (_.isFunction(this.constructor.__super__[attribute])) ?
+    this.constructor.__super__[attribute].apply(this, _.rest(arguments)) :
+    this.constructor.__super__[attribute];
+};
+
+
+
 define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.Model', 'Facets.Views', 'ItemsKeyMapping'], function (Facets, FacetTranslator, FacetHelper, FacetModel, FacetViews, itemsKeyMapping)
 {
 	'use strict';
@@ -18,64 +48,40 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 		
 	,	ecCategoryByUrl: function () 
 		{
-			console.log('ecCategoryByUrl');
 			var self= this
 			,	url = Backbone.history.getFragment()
-			,	defaultTranslator = FacetHelper.parseUrl(Backbone.history.getFragment(), this.translatorConfig)
-			,	urlArray = url.split("/")
-			,	category = urlArray[0].split("?")[0];
-				
-			urlArray.splice(0,1);
-			//console.log(urlArray);
-			
-			console.log(FacetHelper.parseUrl(Backbone.history.getFragment(), this.translatorConfig));
+			,	translator = FacetHelper.parseUrl(url, this.translatorConfig)
+			,	category = translator.getFacetValue('category')
+			,	currCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : category}) || [];		// Find matching ECQS category record from NS
 
-			//var	translator = FacetHelper.parseUrl(urlArray.join("/"), this.translatorConfig)
-			var translator = FacetHelper.parseUrl(Backbone.history.getFragment(), this.translatorConfig)
-			,	currCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : category}) || [];
-			
-			//translator.options = defaultTranslator.options;
-			//translator = translator.cloneForFacetId('category', category)
-			
-			//console.log(url);
-			console.log('category = ' + category);
-			console.log(translator);
-			
-			
-			
-			var model = new FacetModel()
+			var model = new FacetModel()				// Model for item set from facet field on ECQS category record
+			,	itemListModel = new FacetModel()		// Model for item set from item list field on ECQS category record
 			,	view = new ECCategories.View({
 					catModel: currCategory
 				,	translator: translator
 				,	translatorConfig: this.translatorConfig
 				,	application: this.application
 				,	model: model
+				,	itemListModel: itemListModel
 			});
 			
+			// if category has facet field set
 			if (currCategory.custrecord_ecqs_category_facet) {
 				
 				var facetTranslator = FacetHelper.parseUrl(currCategory.custrecord_ecqs_category_facet, this.translatorConfig);
 				
+				// duplicate facet settings from the facet field on the ECQS category record to our translator
 				_.each(facetTranslator.facets, function(facet) {
-					console.log('facet');
-					console.log(facet);
 					translator = translator.cloneForFacetId(facet.id, facet.value);
 				});
 				
-				console.log('testTranslator');
-				console.log(facetTranslator);
-				console.log(translator);
-				
+				// remove category facet or results will be empty since we're using ECQS categories
 				var modelTranslator = translator.cloneWithoutFacetId('category');
 				
 				model.fetch({
 					data: modelTranslator.getApiParams()
 					,	killerId: this.application.killerId
 					,	pageGeneratorPreload: true }).then(function (data) {
-
-						console.log('facet model data');
-						console.log(data);
-						
 						if (data.corrections && data.corrections.length > 0)
 						{
 							var unaliased_url = self.unaliasUrl(url, data.corrections);
@@ -97,20 +103,46 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 						}
 				});
 				
+			// if category has item list field set
+			} else if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
+
+				var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
+					return val.custrecord_ecqs_catitem_item.internalid;
+				});
+				
+				var modelData = translator.getApiParams();
+				modelData.id = ids.join(); 		// max 10 ids per call
+				modelData = _.omit(modelData, 'category');
+
+				itemListModel.fetch({
+					data: modelData
+				,	killerId: this.application.killerId
+				,	pageGeneratorPreload: true }).then(function (data) {
+
+					// data is unordered when returned, need to reorder in order of item list
+					var orderedItems = [];
+					_.each(ids, function(id) {
+						var itemModel = _.find(itemListModel.get('items').models, function(itemModel) {
+							return itemModel.get('internalid') == id;
+						});
+						if (itemModel) {
+							orderedItems.push(itemModel);
+						}
+					});
+
+					itemListModel.get('items').models = orderedItems;
+					view.showContentItemList();
+					
+				});		
+				
 			} else {
 				view.showContent();
-				
-				
-				
 			}
-			
-			
-			
-			
 		}
 	});
 	
-	ECCategories.View = Backbone.View.extend({
+	
+	ECCategories.View = FacetViews.Browse.extend({
 		title: ''
 	,	page_header: ''
 	,	template: 'facet_browse'
@@ -133,22 +165,22 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				selector: 'this.collapsable_elements["facet-header"]'
 			,	collapsed: false
 			};
+			
+			this.parent('inherit', this.options);			// inherit options from Facets.Views.js
 		}
 	
 		// view.getBreadcrumb:
 		// It will generate an array suitable to pass it to the breadcrumb macro
-		// It looks in the category facet value
 	,	getBreadcrumb: function ()
 		{
-			console.log('getBreadcrumbs');
-			//var category_string = this.translator.getFacetValue('category')
 			var category_string = ''
 			,	breadcrumb = [{
 					href: '/'
 				,	text: _('Home').translate()
 				}];
 			
-			
+			// CUSTOMIZATION
+			// iterate through breadcrumbs from ECQS category record and add to breadcrumbs
 			for (var i = 1; i <= 5; i++) {
 				if (this.catModel['custrecord_ecqs_category_crumb_'+i]) {
 					var categoryId = this.catModel['custrecord_ecqs_category_crumb_'+i].internalid;
@@ -157,15 +189,12 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				}
 			}
 			category_string += this.translator.getFacetValue('category');
-			
-			console.log(category_string);
 	
 			if (category_string)
 			{
 				var category_path = '';
 				
 				var tokens = category_string && category_string.split('/') || [];
-				console.log(tokens);
 				if (tokens.length && tokens[0] === '')
 				{
 					tokens.shift();
@@ -173,19 +202,13 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				
 				_.each(tokens, function (cat)
 				{
-					console.log('cat');
-					console.log(cat);
-					//category_path += '/'+cat;
+					var thisCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : cat });
 					category_path = '/'+cat;
-	
-					var thisCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : cat }) 
-					
 					breadcrumb.push({
 						href: category_path
 					,	text: _(thisCategory.name).translate()
 					});
 				});
-	
 			}
 			else if (this.translator.getOptionValue('keywords'))
 			{
@@ -235,21 +258,52 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				// Looks for placeholders and injects the facets
 				self.renderFacets(self.translator.getUrl());
 				
+				// CUSTOMIZATION
+				// add item list block 
 				self.getItemListModel(self.catModel);
 			});
 		}
 	
+		// view.showContentItemList:
+		// Differs from showContent because itemListModel is already defined when this is called
+	,	showContentItemList: function ()
+		{
+			// If its a free text search it will work with the title
+			var keywords = this.translator.getOptionValue('keywords')
+			,	resultCount = this.model.get('total')
+			,	self = this;
+	
+			if (keywords)
+			{
+				keywords = decodeURIComponent(keywords);
+	
+				if (resultCount > 0)
+				{
+					this.subtitle =  resultCount > 1 ? _('Results for "$(0)"').translate(keywords) : _('Result for "$(0)"').translate(keywords);
+				}
+				else
+				{
+					this.subtitle = _('We couldn\'t find any items that match "$(0)"').translate(keywords);
+				}
+			}
+	
+			this.totalPages = Math.ceil(resultCount / this.translator.getOptionValue('show'));
+			// once the showContent is done the afterAppend is called
+			this.application.getLayout().showContent(this).done(function ()
+			{
+				self.appendItemList(self.itemListModel);
+			});
+		}
+	
+		// view.getItemListModel:
+		// Get item list subrecord from ECQS category record
 	,	getItemListModel: function(currCategory) 
 		{
-			console.log('getItemListModel');
-			console.log(currCategory);
 			var self = this;
+			
 			if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
 				
 				var itemListModel = new FacetModel();
-				
-				//console.log('itemListModel');
-				//console.log(itemListModel);
 	
 				var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
 					return val.custrecord_ecqs_catitem_item.internalid;
@@ -258,20 +312,11 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				var modelData = self.translator.getApiParams();
 				modelData.id = ids; 		// max 10 ids per call
 				modelData = _.omit(modelData, 'category');
-		
-				console.log('modelData');
-				console.log(modelData);
+
 				itemListModel.fetch({
 					data: modelData
 				,	killerId: this.application.killerId
 				,	pageGeneratorPreload: true }).then(function (data) {
-		
-					console.log('model data');
-					console.log(data);
-
-					//self.itemListModel = itemListModel;
-					//itemsKeyMapping.getKeyMapping(self.application);
-					//console.log(self.application.getConfig('itemKeyMapping', {}));
 					
 					self.appendItemList(itemListModel);
 					
@@ -287,7 +332,7 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 	,	renderFacets: function (url)
 		{
 			var self = this
-			,	translator = this.translator
+			,	translator = this.translator		// CUSTOMIZATION: pull from translator passed into view instead of creating new translator from url
 			,	facets = this.model.get('facets') || [];
 	
 		
@@ -337,174 +382,12 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			this.$('[data-toggle="slider"]').slider();
 		}
 	
-		// view.fixStatus:
-		// Tries to keep the status of the collapeser based on what they were previously setted
-	,	fixStatus: function (collapser)
-		{
-			var $collapser = jQuery(collapser)
-			,	$facet = $collapser.closest('div[data-type="rendered-facet"]')
-			,	$placeholder = $collapser.closest('div[data-type="all-facets"], div[data-type="facet"]')
-			,	$target = jQuery( $collapser.data('target') );
-	
-			// Checks the path in the Status object is present
-			this.statuses[$placeholder.attr('id')] = this.statuses[$placeholder.attr('id')] || {};
-			this.statuses[$placeholder.attr('id')][$facet.data('facet-id')] = this.statuses[$placeholder.attr('id')][$facet.data('facet-id')] || {};
-	
-			if (_.isUndefined(this.statuses[$placeholder.attr('id')][$facet.data('facet-id')][$collapser.data('type')]))
-			{
-				if ($collapser.data('type') !== 'collapse' && !$target.hasClass('in'))
-				{
-					this.statuses[$placeholder.attr('id')][$facet.data('facet-id')][$collapser.data('type')] = false;
-				}
-				else
-				{
-					this.statuses[$placeholder.attr('id')][$facet.data('facet-id')][$collapser.data('type')] = !this.translator.getFacetConfig($facet.data('facet-id')).collapsed;
-				}
-			}
-	
-			if (this.statuses[$placeholder.attr('id')][$facet.data('facet-id')][$collapser.data('type')])
-			{
-				$target.addClass('in').removeClass('collapse');
-			}
-			else
-			{
-				$target.addClass('collapse').removeClass('in');
-			}
-	
-			this.toggleCollapsableIndicator($collapser, !this.statuses[$placeholder.attr('id')][$facet.data('facet-id')][$collapser.data('type')]);
-		}
-	
-		//view.formatFacetTitle: accepts a facet object and returns a string formatted to be displayed on the document's title according with user facet configuration property titleToken
-	,	formatFacetTitle: function (facet)
-		{
-			var defaults = {
-				range: '$(2): $(0) to $(1)'
-			,	multi: '$(1): $(0)'
-			,	single: '$(1): $(0)'
-			};
-	
-			if (facet.id === 'category')
-			{
-				//we search for a category title starting from the last category of the branch
-				var categories = Categories.getBranchLineFromPath(this.options.translator.getFacetValue('category'));
-				if(categories && categories.length > 0)
-				{
-					for(var i = categories.length - 1; i >= 0; i--)
-					{
-						var category = categories[i];
-						var category_title = category.pagetitle || category.itemid;
-						if(category_title)
-						{
-							return category_title;
-						}
-					}
-				}
-				return null;
-			}
-	
-			if (!facet.config.titleToken)
-			{
-				facet.config.titleToken = defaults[facet.config.behavior] || defaults.single;
-			}
-			if (_.isFunction(facet.config.titleToken))
-			{
-				return facet.config.titleToken(facet);
-			}
-			else if (facet.config.behavior === 'range')
-			{
-				return _(facet.config.titleToken).translate(facet.value.to, facet.value.from, facet.config.name);
-			}
-			else if (facet.config.behavior === 'multi')
-			{
-				var buffer = [];
-				_.each(facet.value, function (val)
-				{
-					buffer.push(val);
-				});
-				return _(facet.config.titleToken).translate(buffer.join(', '), facet.config.name);
-			}
-			else
-			{
-				return _(facet.config.titleToken).translate(facet.value, facet.config.name);
-			}
-		}
-	
-		// overrides Backbone.Views.getTitle
-	,	getTitle: function ()
-		{
-			if (this.title)
-			{
-				return this.title;
-			}
-	
-			var facets = this.options.translator.facets
-			,	title = '';
-	
-			if (facets && facets.length)
-			{
-				var buffer = []
-				,	facet = null;
-	
-				for (var i = 0; i < facets.length; i++)
-				{
-					facet = facets[i];
-					buffer.push(this.formatFacetTitle(facet));
-	
-					if (i < facets.length - 1)
-					{
-						buffer.push(facet.config.titleSeparator || ', ');
-					}
-				}
-	
-				title = this.application.getConfig('searchTitlePrefix', '') +
-						buffer.join('') +
-						this.application.getConfig('searchTitleSufix', '');
-			}
-			else if (this.translator.getOptionValue('keywords'))
-			{
-				title = _('Search results for "$(0)"').translate(
-					this.translator.getOptionValue('keywords')
-				);
-			}
-			else
-			{
-				title = this.application.getConfig('defaultSearchTitle', '');
-			}
-	
-			// Update the meta tag 'twitter:title'
-			this.setMetaTwitterTitle(title);
-	
-			return title;
-		}
-	
-		// view.toggleCollapsableIndicator
-		// Handles the collapsables and store the status
-	,	toggleCollapsableIndicator: function (element, is_open)
-		{
-			var $element = jQuery(element).closest('*[data-toggle="collapse"]'),
-				$facet_container = $element.closest('div[data-type="rendered-facet"]');
-	
-			is_open = _.isUndefined(is_open) ? jQuery($element.data('target')).hasClass('in') : is_open;
-	
-			$element
-				.find('*[data-collapsed!=""]')
-				.filter('[data-collapsed="true"]')[is_open ? 'hide' : 'show']().end()
-				.filter('[data-collapsed="false"]')[is_open ? 'show' : 'hide']();
-	
-			var holder_html_id = $facet_container.parent().attr('id')
-			,	facet_id = $facet_container.data('facet-id')
-			,	type = $element.data('type');
-	
-			this.statuses[holder_html_id][facet_id][type] = !is_open;
-		}
-
+		// view.appendItemList:
+		// Add Item List block to view 
 	,	appendItemList:function(itemListModel) 
 		{
-			console.log('append custom item list');
-			
-			var self = this;
-			//var itemListModel = self.itemListModel;
-			var cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name;
+			var self = this
+			, 	cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name;
 			
 			var displayOption = _.find(this.application.getConfig('itemsDisplayOptions'), function (option)
 			{
@@ -519,45 +402,28 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				this.$('section[data-type="custom-item-list"]').each(function (i, div)
 				{
 					var $div = jQuery(div).empty();
-					console.log($div);
-					console.log(itemListModel.get('items').models);
 					
 					if (SC.macros[cellTemplate]) {
 						$div.append( SC.macros[cellTemplate](self, itemListModel));
-					} else {
-			
-						console.log(itemListModel);
-						
-						
+					} else {		// append generic item list view
 						$div.append( SC.macros['displayInRows'](itemListModel.get('items').models, cellWrap, displayOption.columns) );
-				
-						
-					}
-					
+					}					
 				});
 			}
-			
-			
 		}
-
 	});
+	
 	
 	ECCategories.mountToApp = function(application)
 	{
-		
+		// Set up custom routing for all ECQS category pages
 		application.on('afterModulesLoaded', function ()
 		{
 			Facets.setTranslatorConfig(application);
-			
-			
+
 			var query = ''
-			,	categoryUrls = _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'));
-			console.log('ECCategories afterModulesLoaded');
-			//console.log(categoryUrls);
-			
-			
-			
-			var facets_data = application.getConfig('siteSettings.facetfield')
+			,	categoryUrls = _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))
+			,	facets_data = application.getConfig('siteSettings.facetfield')
 			,	facets_to_include = [];
 
 			_.each(facets_data, function(facet) {
@@ -587,18 +453,17 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				
 				ECCategories.Router.prototype.routes[category_page + '?*options'] = 'ecCategoryByUrl';
 				ECCategories.Router.prototype.routes[category_page] = 'ecCategoryByUrl';
-				//ECCategories.Router.prototype.routes[new RegExp(facet_regex)] = 'ecCategoryByUrl';
-				//console.log(new RegExp(facet_regex));
-				routerInstance.route(new RegExp(facet_regex), 'ecCategoryByUrl');
 
+				routerInstance.route(new RegExp(facet_regex), 'ecCategoryByUrl');
 			});
 
 			return routerInstance;
 		});
 		
+		
+		// Rewrite getUrl to take into account ECQS category urls
 		FacetTranslator.prototype.getUrl = function () {
-			console.log('NEW GET URL');
-		    // new code	
+
 			var url = ''
 			,	self = this;
 
@@ -619,17 +484,16 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				return '#';
 			}
 
+			// CUSTOMIZATION
 			// Adds the category if it's prsent
 			var category_string = this.getFacetValue('category');
 			if (category_string)
 			{
 				url = self.configuration.facetDelimiters.betweenDifferentFacets + category_string;
 			}
-			console.log(this);
-			console.log('category_string = ' + category_string);
-			
+
 			var facetsNoCategory = _.filter(this.facets, function(facet){ return facet.id != 'category'; });
-			console.log(facetsNoCategory);
+
 			// Encodes the other Facets
 			var sorted_facets = _.sortBy(facetsNoCategory, 'url');
 			for (var i = 0; i < sorted_facets.length; i++)
@@ -708,12 +572,11 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 
 			return _(url).fixUrl();
 		}
+	
 		
-		
-		
+		// Rewrite parseUrl to take into account ECQS category urls
 		FacetTranslator.prototype.parseUrl = function (url) {
-			
-			console.log('parseUrl');
+
 			// We remove a posible 1st / (slash)
 			url = (url[0] === '/') ? url.substr(1) : url;
 
@@ -722,9 +585,9 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 			,	facets = (facets_n_options[0] && facets_n_options[0] !== this.configuration.fallbackUrl) ? facets_n_options[0] : ''
 			,	options = facets_n_options[1] || '';
 
-			//console.log(this.getFacetConfig('category'));
+			// CUSTOMIZATION
 			// We treat category as the 1st unmaned facet filter, so if you are using categories
-			// we will try to take that out by comparig the url with the category tree
+			// we will try to take that out by comparig the url with ECQS category records
 			if (this.getFacetConfig('category'))
 			{
 				var tokens = facets && facets.split('/') || [];
@@ -733,29 +596,17 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				{
 					tokens.shift();
 				}
-				//console.log('tokens');
-				//console.log(tokens);
+
 				var branch = []
 				,	slice = {categories: _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))};
 				
 				for (var i = 0; i < tokens.length; i++)
 				{
 					var current_token = tokens[i];
-					
-					//console.log('slice.categories');
-					//console.log(slice.categories);
-					//console.log(slice.categories[current_token]);
-					
+
 					if (slice.categories && _.indexOf(slice.categories, current_token) > -1)
 					{
-						
-						//console.log('branch');
-						
-						
 						branch.push(current_token);
-						//slice = slice.categories[current_token];
-						
-						//console.log(branch);
 					}
 					else
 					{
@@ -764,9 +615,6 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 				}
 				
 				var categories = branch || [];
-				//console.log('categories');
-				//console.log(facets);		// this returns all facets
-				//console.log(categories);
 
 				if (categories && categories.length)
 				{
@@ -806,8 +654,9 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'Facets.Helper', 'Facets.
 	return ECCategories;
 });
 
+
 (function(application)
 {
-	application.Configuration.modules.push('ECCategories');
+	application.Configuration.modules.push('ECCategories');			// append this to Configuration modules so it can be called by Starter.js
 
 })(SC.Application('Shopping'));

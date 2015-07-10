@@ -6,17 +6,6 @@
 	,	translator = view.translator
 	,	subcategories = catModel.recmachcustrecord_ecqs_category_parent || null
 	,	cellTemplate = catModel.custrecord_ecqs_category_tmpl_cell.name;
-	
-	console.log('facet_browse');
-	console.log(view);
-	console.log(model);
-	console.log(items);
-	console.log(facets);
-	console.log(translator);
-	console.log('cellTemplate = ' + cellTemplate);
-	console.log(view.options.application.getConfig('defaultPaginationSettings'));
-	
-	
 %>
 <div data-cms-area="item_list_banner" data-cms-area-filters="page_type"></div>
 <div class="view-header" itemscope itemtype="http://schema.org/WebPage">
