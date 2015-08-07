@@ -48,11 +48,9 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 					data: modelTranslator.getApiParams()
 					,	killerId: this.application.killerId
 					,	pageGeneratorPreload: true }).then(function (data) {
-//						console.log('item data: ' + JSON.stringify(data));
+
 						if (data.corrections && data.corrections.length > 0)
 						{
-//							console.log('data.corrections: ' + JSON.stringify(data.corrections));
-//							console.log('data.corrections.length: ' + data.corrections.length);
 							var unaliased_url = self.unaliasUrl(url, data.corrections);
 
 							if (SC.ENVIRONMENT.jsEnvironment === 'server')

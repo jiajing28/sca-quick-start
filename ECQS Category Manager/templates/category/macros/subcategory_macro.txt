@@ -2,8 +2,6 @@
 <%
 	var subcategoryModel = _.findWhere(ECQS.categories, {id : id});
 	var application = view.application;
-	console.log('subcat model');
-	console.log(subcategoryModel);
 	
 %>
 
