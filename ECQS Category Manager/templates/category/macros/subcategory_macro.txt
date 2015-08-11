@@ -2,6 +2,7 @@
 <%
 	var subcategoryModel = _.findWhere(ECQS.categories, {id : id});
 	var application = view.application;
+	var thumbnail = subcategoryModel.columns.custrecord_ecqs_category_thumbnail ? subcategoryModel.columns.custrecord_ecqs_category_thumbnail.name : '';
 	
 %>
 
@@ -9,10 +10,10 @@
 	<div class="category-cell-thumbnail thumbnail">		
 		<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
 			<a href="/<%= subcategoryModel.custrecord_ecqs_category_url %>">
-				<img src="<%= subcategoryModel.thumbnail %>"/>
+				<img src="<%= thumbnail %>"/>
 			</a>
 		<% } else { %>
-			<img src="<%= subcategoryModel.thumbnail %>"/>
+			<img src="<%= thumbnail %>"/>
 		<% } %>
 	</div>
 	<div class="category-cell-name">

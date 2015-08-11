@@ -226,8 +226,6 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 			// Set up custom routing for all ECQS category pages
 			application.on('afterModulesLoaded', function ()
 			{
-				Facets.setTranslatorConfig(application);
-	
 				var query = ''
 				,	categoryUrls = _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))
 				,	facets_data = application.getConfig('siteSettings.facetfield')
