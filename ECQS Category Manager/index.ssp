@@ -8,24 +8,9 @@ var ECQS = window.ECQS = {};
 	ECQS.categories = <%= JSON.stringify(Categories) %>;
 <% } %>
 
-
-/*
-var firstScriptTag=!SC.isPageGenerator()&&document.getElementsByTagName("script")[0];
-var tempscript=document.createElement("script");
-tempscript.src='/SCA-Quick-Start/ECQS-Category-Manager/templates/Templates-014f1e5935f5.js';
-tempscript.type="text/javascript";
-
-
-var jsscript=document.createElement("script");
-jsscript.src='/SCA-Quick-Start/ECQS-Category-Manager/js/Application-014f09db6034.js';
-jsscript.type="text/javascript";
-firstScriptTag.parentNode.insertBefore(jsscript,firstScriptTag);
-firstScriptTag.parentNode.insertBefore(tempscript,firstScriptTag);
-*/
-
 loadScript([
 	'/SCA-Quick-Start/ECQS-Category-Manager/templates/Templates-014f1e5935f5.js'
 ,	'/SCA-Quick-Start/ECQS-Category-Manager/js/Application-014f09db6034.js'
 ]);
 
-console.log("ECQS CATEGORY MANAGER INDEX.SSP");
+//console.log("ECQS CATEGORY MANAGER INDEX.SSP");
