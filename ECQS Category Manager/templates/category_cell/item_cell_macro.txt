@@ -1,29 +1,29 @@
-<% registerMacro('ECQSitemCell', function(view, model, numAcross) { %>
+<% registerMacro('ECQSitemCell', function(view, model) { %>
 	<%
 		var catModel = view.catModel
 	,	items = model.get('items').models
 	,	facets = model.get('facets')
 	,	translator = view.translator
 	,	subcategories = catModel.recmachcustrecord_ecqs_category_parent || null
-	,	itemsAcross = parseInt(numAcross) || 4
+	,	itemsAcross = 4
 	,	span;
 	
 	span = 12 / itemsAcross;
-	span = 'span' + span;
+	//span = 'span' + span;
 
 	%>
 	<% if (items) { %>
-		<!-- Item List  / test-->
-		<div id="item-list" class="item-list test">
-			<div class="row-fluid test">
-				<% _.each(items, function (item, index){ %>
-					<div class="<%= span %>">
-						<%= SC.macros.itemCellGrid(item, view) %>
-					</div>
-				<% }); %>
-				<div class="clearfix"></div>
+	
+		<div class="row-fluid">
+		<% _.each(items, function (item, index){ %>
+			<% if ((index % itemsAcross) == 0 && index > 0){ %>
+				</div>
+				<div class="row-fluid">
+			<% } %>
+			<div class="span<%= span %>">
+				<%= SC.macros.itemCellGrid(item, view) %>
 			</div>
+		<% }) %>
 		</div>
-		<!-- /Item List -->
 	<% } %> 
 <%})%>

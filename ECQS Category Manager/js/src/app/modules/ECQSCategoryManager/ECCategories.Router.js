@@ -77,8 +77,9 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 					return val.custrecord_ecqs_catitem_item.internalid;
 				});
 				
-				var modelData = translator.getApiParams();
-				modelData.id = ids.join(); 		// max 10 ids per call
+				var modelData = translator.getApiParams()
+				,	allItemIds = ids.join(); 		
+				modelData.id = _.first(allItemIds, 10);		// max 10 ids per call
 				modelData = _.omit(modelData, 'category');
 
 				itemListModel.fetch({
@@ -96,8 +97,10 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 							orderedItems.push(itemModel);
 						}
 					});
-					
+					console.log('modelData', modelData);
+					console.log('itemListModel', itemListModel);
 					itemListModel.get('items').models = orderedItems;
+					view.catModel.itemIds = allItemIds;
 					view.model = itemListModel;
 					//view.showContentItemList();
 					view.showContent(false);
