@@ -1,4 +1,4 @@
-define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Views'], function (FacetHelper, FacetModel, Views)
+define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Views', 'OrderedItems.Model'], function (FacetHelper, FacetModel, Views, OrderedItemModel)
 {
 	'use strict';
 	
@@ -21,7 +21,7 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 			,	currCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : category}) || [];		// Find matching ECQS category record from NS
 
 			var model = new FacetModel()				// Model for item set from facet field on ECQS category record
-			,	itemListModel = new FacetModel()		// Model for item set from item list field on ECQS category record
+			,	itemListModel = new OrderedItemModel()		// Model for item set from item list field on ECQS category record
 			,	view = new Views({
 					catModel: currCategory
 				,	translator: translator
@@ -43,6 +43,13 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 				
 				// remove category facet or results will be empty since we're using ECQS categories
 				var modelTranslator = translator.cloneWithoutFacetId('category');
+				
+				if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
+					var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
+						return val.custrecord_ecqs_catitem_item.internalid;
+					});
+					view.catModel.itemIds = ids;
+				}
 				
 				model.fetch({
 					data: modelTranslator.getApiParams()
@@ -78,8 +85,8 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 				});
 				
 				var modelData = translator.getApiParams()
-				,	allItemIds = ids.join(); 		
-				modelData.id = _.first(allItemIds, 10);		// max 10 ids per call
+				,	firstTenIds = _.first(ids, 10); 		
+				modelData.id = firstTenIds.join();		// max 10 ids per call
 				modelData = _.omit(modelData, 'category');
 
 				itemListModel.fetch({
@@ -88,8 +95,9 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 				,	pageGeneratorPreload: true }).then(function (data) {
 
 					// data is unordered when returned, need to reorder in order of item list
+					/*
 					var orderedItems = [];
-					_.each(ids, function(id) {
+					_.each(firstTenIds, function(id) {
 						var itemModel = _.find(itemListModel.get('items').models, function(itemModel) {
 							return itemModel.get('internalid') == id;
 						});
@@ -97,11 +105,15 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 							orderedItems.push(itemModel);
 						}
 					});
+					*/
+					console.log('firstTenIds', firstTenIds);
 					console.log('modelData', modelData);
 					console.log('itemListModel', itemListModel);
-					itemListModel.get('items').models = orderedItems;
-					view.catModel.itemIds = allItemIds;
-					view.model = itemListModel;
+					console.log('model', model);
+					view.model.set("items", []);
+					//itemListModel.get('items').models = orderedItems;
+					view.catModel.itemIds = ids;
+					view.itemListModel = itemListModel;
 					//view.showContentItemList();
 					view.showContent(false);
 					

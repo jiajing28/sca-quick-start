@@ -27,14 +27,12 @@ define('OrderedItems.Model', ['ItemDetails.Collection', 'Session'], function (It
 
 	,	initialize: function (options)
 		{
-			var application = options.application;
-			var modelData = options.modelData || {};
-			var ids = modelData.id || "";
-			var arrayOfIds = ids.split(',');
+			//var application = options.application;
+			var self = this;
 			//console.log('arrayOfIds = ' + JSON.stringify(arrayOfIds));
 		
 			// sets default options for the search api
-			this.searchApiMasterOptions = application.getConfig('searchApiMasterOptions.Facets', {});
+			//this.searchApiMasterOptions = application.getConfig('searchApiMasterOptions.Facets', {});
 
 			// Listen to the change event of the items and converts it to an ItemDetailsCollection
 			this.on('change:items', function (model, items)
@@ -54,12 +52,14 @@ define('OrderedItems.Model', ['ItemDetails.Collection', 'Session'], function (It
 				console.log('OrderItems presort');
 				console.log(unsortedItemIds);
 				*/
-				
+				console.log('change:items model',  model);
+				console.log('change:items items',  items);
 				// sort items collection by the order returned from getCategories.  This overrides the default sort order in the item search api.
+				
 				items.comparator = function (model) {
-					var foundIndex = arrayOfIds.length;
-					for (var i = 0; i < arrayOfIds.length; i++) {
-						if (model.id == arrayOfIds[i]) {
+					var foundIndex = self.arrayOfIds.length;
+					for (var i = 0; i < self.arrayOfIds.length; i++) {
+						if (model.id == self.arrayOfIds[i]) {
 							foundIndex = i;
 							break;
 						}
@@ -89,12 +89,22 @@ define('OrderedItems.Model', ['ItemDetails.Collection', 'Session'], function (It
 	,	fetch: function (options)
 		{
 			options = options || {};
-
+			
+			var modelData = options.data || {};
+			var ids = modelData.id || "";
+			this.arrayOfIds = ids.split(',');
+			
 			options.cache = true;
 
 			return original_fetch.apply(this, arguments);
 		}
 
 
+	} , {
+		mountToApp: function (application) 
+		{
+			// sets default options for the search api
+			this.prototype.searchApiMasterOptions = application.getConfig('searchApiMasterOptions.Facets', {});
+		}
 	});
 });

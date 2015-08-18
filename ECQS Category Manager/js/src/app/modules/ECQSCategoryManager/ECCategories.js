@@ -28,7 +28,7 @@ Backbone.View.prototype.parent = Backbone.Model.prototype.parent = Backbone.Coll
 
 
 
-define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'ECCategories.Router'], function (Facets, FacetTranslator, Views, Router)
+define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'ECCategories.Router', 'OrderedItems.Model'], function (Facets, FacetTranslator, Views, Router, Model)
 {
 	'use strict';
 
@@ -219,7 +219,8 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 	
 	
 	var ECCategories = {
-		Router : Router
+		Model:  Model
+	,	Router : Router
 	,	View : Views
 	,	mountToApp: function (application) 
 		{
@@ -261,6 +262,9 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 	
 					routerInstance.route(new RegExp(facet_regex), 'ecCategoryByUrl');
 				});
+				
+				// Wires some config to the model
+				Model.mountToApp(application);
 	
 				return routerInstance;
 			});

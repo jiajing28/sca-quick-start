@@ -14,16 +14,16 @@
 	%>
 	<% if (items) { %>
 	
-		<div class="row-fluid">
+		<!-- <div class="row-fluid"> -->
 		<% _.each(items, function (item, index){ %>
 			<% if ((index % itemsAcross) == 0 && index > 0){ %>
-				</div>
-				<div class="row-fluid">
+				<!-- </div> -->
+				<!-- <div class="row-fluid"> -->
 			<% } %>
 			<div class="span<%= span %>">
 				<%= SC.macros.itemCellGrid(item, view) %>
 			</div>
 		<% }) %>
-		</div>
+		<!-- </div> -->
 	<% } %> 
 <%})%>

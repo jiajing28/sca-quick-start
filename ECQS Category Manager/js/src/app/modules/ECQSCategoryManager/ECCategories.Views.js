@@ -1,4 +1,4 @@
-define('ECCategories.Views', ['Facets.Model', 'Facets.Views'], function (FacetModel, FacetViews)
+define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Model'], function (FacetModel, FacetViews, OrderedItemModel)
 {
 	'use strict';
 	
@@ -128,11 +128,92 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views'], function (FacetMo
 					
 					// CUSTOMIZATION
 					// add item list block 
-					self.getItemListModel(self.catModel);
+					//self.getItemListModel(self.catModel);
+					
+					if (self.catModel.itemIds) {
+						self.getAllItemList(false);
+					}
+					
+				} else if (self.catModel.itemIds && self.catModel.itemIds.length > 10) {
+					console.log('has more itemIds');
+					self.getAllItemList(true);
 				}
 			});
 		}
 	
+	,	getAllItemList: function(skipFirstSet) 
+		{
+			console.log('self.catModel.itemIds', this.catModel.itemIds);
+			var self = this;
+			var itemIdCount = 10;
+			var numOfItemIds = this.catModel.itemIds.length
+			var numOfCalls = Math.floor(numOfItemIds % itemIdCount == 0 ? numOfItemIds / itemIdCount - 1 : numOfItemIds / itemIdCount);
+			console.log('numOfCalls', numOfCalls);
+			
+			if (!skipFirstSet) {
+				//numOfCalls ++;
+				
+				for (var i = 0; i <= numOfCalls; i++) {
+					var itemIdArray = [];
+					if (i == numOfCalls) {
+						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount);
+					} else {
+						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount, (i+1)*itemIdCount - 1);
+					}
+					
+					console.log('itemIdArray', itemIdArray);
+					self.getItemsModel(itemIdArray);
+					
+				}
+			} else {
+			
+				for (var i = 1; i <= numOfCalls; i++) {
+					var itemIdArray = [];
+					if (i == numOfCalls) {
+						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount);
+					} else {
+						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount, (i+1)*itemIdCount - 1);
+					}
+					
+					console.log('itemIdArray', itemIdArray);
+					self.getItemsModel(itemIdArray);
+					
+				}
+			}
+		}
+	
+	,	getItemsModel: function (itemIdArray)
+		{
+			var self = this;
+			var modelData = self.translator.getApiParams();
+			modelData.id = itemIdArray.join(); 		// max 10 ids per call
+			modelData = _.omit(modelData, 'category');
+	
+			var itemListModel = new OrderedItemModel();
+			itemListModel.fetch({
+				data: modelData
+			,	killerId: this.application.killerId
+			,	pageGeneratorPreload: true }).then(function (data) {
+				
+				// data is unordered when returned, need to reorder in order of item list
+				/*
+				var orderedItems = [];
+				_.each(itemIdArray, function(id) {
+					var itemModel = _.find(itemListModel.get('items').models, function(itemModel) {
+						return itemModel.get('internalid') == id;
+					});
+					if (itemModel) {
+						orderedItems.push(itemModel);
+					}
+				});
+				
+				itemListModel.get('items').models = orderedItems;
+				*/
+				self.appendItemList(itemListModel);
+				
+			});		
+		}
+			
 		// view.showContentItemList:
 		// Differs from showContent because itemListModel is already defined when this is called
 	,	showContentItemList: function ()
@@ -186,7 +267,7 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views'], function (FacetMo
 					data: modelData
 				,	killerId: this.application.killerId
 				,	pageGeneratorPreload: true }).then(function (data) {
-					
+
 					self.appendItemList(itemListModel);
 					
 				});		
@@ -255,6 +336,7 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views'], function (FacetMo
 		// Add Item List block to view 
 	,	appendItemList:function(itemListModel) 
 		{
+			/*
 			var self = this
 			, 	cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name;
 			
@@ -278,6 +360,17 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views'], function (FacetMo
 						$div.append( SC.macros['displayInRows'](itemListModel.get('items').models, cellWrap, displayOption.columns) );
 					}					
 				});
+			}
+			*/
+		
+			console.log('itemListModel', itemListModel);
+			
+			var self = this
+			, 	cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name
+			, 	itemListSection = self.$('section#item-list-container');
+			
+			if (SC.macros[cellTemplate]) {
+				itemListSection.append( SC.macros[cellTemplate](self, itemListModel));
 			}
 		}
 	});

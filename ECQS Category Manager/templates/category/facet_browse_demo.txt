@@ -4,12 +4,13 @@
 	,	items = model.get('items')
 	,	facets = model.get('facets')
 	,	translator = view.translator
-	,	hasItemList = view.itemListModel != null
+	,	hasItemList =  typeof view.itemListModel.get('items') !== 'undefined'
 	,	itemListItems = hasItemList ? view.itemListModel.get('items') : null
 	,	subcategories = catModel.recmachcustrecord_ecqs_category_parent || null
 	,	cellTemplate = catModel.custrecord_ecqs_category_tmpl_cell.name;
 	
 	console.log('hasItemList', hasItemList);
+	console.log('view.itemListModel', view.itemListModel);
 	console.log('itemListItems', itemListItems);
 %>
 <div data-cms-area="item_list_banner" data-cms-area-filters="page_type"></div>
@@ -54,11 +55,13 @@
 		
 		<% if (SC.macros[cellTemplate] && hasItemList) { %>
 			<h3>Item List</h3>
-			<section id="item-list-container" class="item-list-container">
+			<section id="item-list-container" class="item-list-container row-fluid">
 				<%= SC.macros[cellTemplate](view, view.itemListModel) %>
 			</section>
+		<% } else if (view.catModel.itemIds) { %>
+			<h3>Item List</h3>
+			<section id="item-list-container" class="item-list-container row-fluid"></section>
 		<% } %>
-		
 		
 		<% if (items && items.length > 0) { %>
 			<%
