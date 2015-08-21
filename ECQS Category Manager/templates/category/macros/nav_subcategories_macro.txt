@@ -10,12 +10,16 @@
 	<div class="well-body">
 		<ul>
 			<% _.each(subcategories, function (subcategory) { %>
-				<% var subcategoryModel = _.findWhere(ECQS.categories, {id : subcategory.iddisp}); %>
-				<li>			
+				<% 
+					var subcategoryModel = _.findWhere(ECQS.categories, {id : subcategory.custrecord_ecqs_subcat_child.internalid})
+					,	subcategoryName = subcategoryModel.custrecord_ecqs_category_displayname || subcategoryModel.name
+					,	is_active = subcategoryModel ? subcategoryName == view.page_header : false;
+				%>
+				<li class="<%= is_active  ? 'active' : 'inactive' %>">			
 					<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
-						<a href="/<%= subcategoryModel.custrecord_ecqs_category_url %>"><%= subcategoryModel.name %></a>
+						<a href="/<%= subcategoryModel.custrecord_ecqs_category_url %>"><%= subcategoryName %></a>
 					<% } else { %>
-						<%= subcategoryModel.name %>
+						<%= subcategoryName %>
 					<% } %>
 				</li>
 			<% }); %>

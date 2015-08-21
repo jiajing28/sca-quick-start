@@ -4,14 +4,13 @@
 	,	items = model.get('items')
 	,	facets = model.get('facets')
 	,	translator = view.translator
+	,	displayName = catModel.custrecord_ecqs_category_displayname || catModel.name
 	,	hasItemList =  typeof view.itemListModel.get('items') !== 'undefined'
 	,	itemListItems = hasItemList ? view.itemListModel.get('items') : null
-	,	subcategories = catModel.recmachcustrecord_ecqs_category_parent || null
+	,	subcategories = catModel.recmachcustrecord_ecqs_subcat_parent || null
 	,	cellTemplate = catModel.custrecord_ecqs_category_tmpl_cell.name;
 	
-	console.log('hasItemList', hasItemList);
-	console.log('view.itemListModel', view.itemListModel);
-	console.log('itemListItems', itemListItems);
+	console.log('VIEW', view);
 %>
 <div data-cms-area="item_list_banner" data-cms-area-filters="page_type"></div>
 <div class="view-header" itemscope itemtype="http://schema.org/WebPage">
@@ -28,7 +27,7 @@
 	</nav>
 	<div id="category-content-body" class="span9">
 		<meta itemprop="name" content="<%- view.getTitle() %>">
-		<h1><%= catModel.name %></h1>
+		<h1><%= displayName %></h1>
 		<div id="banner-section-top" class="content-banner banner-section-top" data-cms-area="item_list_banner_top" data-cms-area-filters="path"></div>
 		<div id="ecqs-category-banner" class="content-banner banner-section-top">
 			<%= catModel.custrecord_ecqs_category_banner %>
@@ -38,7 +37,7 @@
 				<div class="row-fluid">
 					<div class="span12">
 						<% _.each(subcategories, function (subcategory) { %>
-							<%= subcategoryCell(subcategory.iddisp, view) %>
+							<%= subcategoryCell(subcategory.custrecord_ecqs_subcat_child.internalid, view) %>
 						<% }); %>
 					</div>
 				</div>

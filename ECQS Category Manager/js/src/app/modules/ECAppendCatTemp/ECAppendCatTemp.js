@@ -12,3 +12,5 @@
  }
  
 })(SC.Application('Shopping'));
+
+console.log("ADD ECCatTemplates");

@@ -9,8 +9,8 @@ var ECQS = window.ECQS = {};
 <% } %>
 
 loadScript([
-	'/SCA-Quick-Start/ECQS-Category-Manager/templates/Templates-014f1e5935f5.js'
+	'/SCA-Quick-Start/ECQS-Category-Manager/templates/Templates-014f42ea1a20.js'
 ,	'/SCA-Quick-Start/ECQS-Category-Manager/js/Application-014f09db6034.js'
 ]);
 
-//console.log("ECQS CATEGORY MANAGER INDEX.SSP");
+console.log("ECQS CATEGORY MANAGER INDEX.SSP");
