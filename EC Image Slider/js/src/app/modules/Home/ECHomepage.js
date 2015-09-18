@@ -23,11 +23,12 @@ define('ECHomepage', function()
 	,	initialize: function (application)
 		{
 			this.application = application;
+			console.log('init slider router');
 		}
 		
 	,	customHomePage: function()
 		{
-
+			console.log('in slider router');
 			var view = new ECHomepage.View({
 				application: this.application
 			});
@@ -49,15 +50,17 @@ define('ECHomepage', function()
 
 (function(application)
 {
-	application.Configuration.modules.push('ECHomepage');
-	
-	application.Configuration.navigationTabs.push({		
-		data: {		
-			hashtag: '#/ecqs-slider-demo'		
-		,	touchpoint: 'home'		
-		}		
-	,	href: 'ecqs-slider-demo'		
-	,	text: 'ECQS Slider Demo'		
-	});
+	if (application.Configuration) {
+		application.Configuration.modules.push('ECHomepage');
+		
+		application.Configuration.navigationTabs.push({		
+			data: {		
+				hashtag: '#/ecqs-slider-demo'		
+			,	touchpoint: 'home'		
+			}		
+		,	href: 'ecqs-slider-demo'		
+		,	text: 'ECQS Slider Demo'		
+		});
+	}
 	
 })(SC.Application('Shopping'));

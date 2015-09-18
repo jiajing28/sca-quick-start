@@ -27,12 +27,9 @@ define('OrderedItems.Model', ['ItemDetails.Collection', 'Session'], function (It
 
 	,	initialize: function (options)
 		{
-			//var application = options.application;
 			var self = this;
-			//console.log('arrayOfIds = ' + JSON.stringify(arrayOfIds));
-		
-			// sets default options for the search api
-			//this.searchApiMasterOptions = application.getConfig('searchApiMasterOptions.Facets', {});
+			var ids = options ? options.data: "";
+			var arrayOfIds = ids.split(',');
 
 			// Listen to the change event of the items and converts it to an ItemDetailsCollection
 			this.on('change:items', function (model, items)
@@ -43,41 +40,17 @@ define('OrderedItems.Model', ['ItemDetails.Collection', 'Session'], function (It
 					model.set('items', new ItemDetailsCollection(_.compact(items)));
 				}
 				
-				//TODO: display current order of items
-				/*
-				var items = model.get('items');
-				var unsortedItemIds = _.map(items.models, function (value) {
-					return value.id;
-				});
-				console.log('OrderItems presort');
-				console.log(unsortedItemIds);
-				*/
-				console.log('change:items model',  model);
-				console.log('change:items items',  items);
-				// sort items collection by the order returned from getCategories.  This overrides the default sort order in the item search api.
-				
+				// sort items collection by the order returned from getCategories.  This overrides the default sort order in the item search api.	
 				items.comparator = function (model) {
-					var foundIndex = self.arrayOfIds.length;
-					for (var i = 0; i < self.arrayOfIds.length; i++) {
-						if (model.id == self.arrayOfIds[i]) {
+					var foundIndex = arrayOfIds.length;
+					for (var i = 0; i < arrayOfIds.length; i++) {
+						if (model.id == arrayOfIds[i]) {
 							foundIndex = i;
 							break;
 						}
 					}
-					//console.log('model.id: ' + model.id + ', foundIndex: ' + foundIndex);
 					return foundIndex;
 				};
-				
-				/*
-				items.on('sort', function (items) {
-					//TODO: display sorted order of items.
-					var sortedItemIds = _.map(items.models, function (value) {
-						return value.id;
-					});
-					console.log('OrderItems postsort event');
-					console.log(sortedItemIds);
-				});
-				*/
 				
 				items.sort();
 			});
@@ -89,11 +62,7 @@ define('OrderedItems.Model', ['ItemDetails.Collection', 'Session'], function (It
 	,	fetch: function (options)
 		{
 			options = options || {};
-			
-			var modelData = options.data || {};
-			var ids = modelData.id || "";
-			this.arrayOfIds = ids.split(',');
-			
+
 			options.cache = true;
 
 			return original_fetch.apply(this, arguments);

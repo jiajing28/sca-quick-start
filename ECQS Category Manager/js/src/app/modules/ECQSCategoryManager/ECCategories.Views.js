@@ -18,11 +18,9 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 			this.itemListModel = options.itemListModel;
 			this.translator = options.translator;
 			this.title = this.catModel.custrecord_ecqs_category_page_title;
-			this.page_header = this.catModel.name;
-			
-			this.metaDescription = 'test description';
-			this.metaKeywords = 'keyword1, keyword2';
-			
+			this.page_header = this.catModel.custrecord_ecqs_category_displayname || this.catModel.name;	
+			this.setMetaTags();
+	
 			this.statuses = statuses;
 			this.collapsable_elements = collapsable_elements;
 			
@@ -32,7 +30,7 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 				selector: 'this.collapsable_elements["facet-header"]'
 			,	collapsed: false
 			};
-			
+
 			this.parent('inherit', this.options);			// inherit options from Facets.Views.js
 		}
 	
@@ -51,7 +49,7 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 			for (var i = 1; i <= 5; i++) {
 				if (this.catModel['custrecord_ecqs_category_crumb_'+i]) {
 					var categoryId = this.catModel['custrecord_ecqs_category_crumb_'+i].internalid;
-					var breadcrumbCat = _.findWhere(ECQS.categories, {id : categoryId});
+					var breadcrumbCat = _.find(ECQS.categories,  function(e) { return e.id == categoryId });
 					category_string += breadcrumbCat.custrecord_ecqs_category_url + '/';
 				}
 			}
@@ -73,7 +71,7 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 					category_path = '/'+cat;
 					breadcrumb.push({
 						href: category_path
-					,	text: _(thisCategory.name).translate()
+					,	text: _(thisCategory.custrecord_ecqs_category_displayname || thisCategory.name).translate()
 					});
 				});
 			}
@@ -119,6 +117,7 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 			}
 
 			this.totalPages = Math.ceil(resultCount / this.translator.getOptionValue('show'));
+			
 			// once the showContent is done the afterAppend is called
 			this.application.getLayout().showContent(this).done(function ()
 			{
@@ -128,152 +127,71 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 					
 					// CUSTOMIZATION
 					// add item list block 
-					//self.getItemListModel(self.catModel);
-					
 					if (self.catModel.itemIds) {
-						self.getAllItemList(false);
+						self.getAllItemList();
 					}
 					
-				} else if (self.catModel.itemIds && self.catModel.itemIds.length > 10) {
-					console.log('has more itemIds');
-					self.getAllItemList(true);
 				}
 			});
 		}
 	
-	,	getAllItemList: function(skipFirstSet) 
+	,	getAllItemList: function() 
 		{
-			console.log('self.catModel.itemIds', this.catModel.itemIds);
-			var self = this;
-			var itemIdCount = 10;
-			var numOfItemIds = this.catModel.itemIds.length
-			var numOfCalls = Math.floor(numOfItemIds % itemIdCount == 0 ? numOfItemIds / itemIdCount - 1 : numOfItemIds / itemIdCount);
-			console.log('numOfCalls', numOfCalls);
-			
-			if (!skipFirstSet) {
-				//numOfCalls ++;
-				
-				for (var i = 0; i <= numOfCalls; i++) {
-					var itemIdArray = [];
-					if (i == numOfCalls) {
-						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount);
-					} else {
-						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount, (i+1)*itemIdCount - 1);
-					}
-					
-					console.log('itemIdArray', itemIdArray);
-					self.getItemsModel(itemIdArray);
-					
-				}
-			} else {
-			
-				for (var i = 1; i <= numOfCalls; i++) {
-					var itemIdArray = [];
-					if (i == numOfCalls) {
-						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount);
-					} else {
-						itemIdArray = self.catModel.itemIds.slice(i * itemIdCount, (i+1)*itemIdCount - 1);
-					}
-					
-					console.log('itemIdArray', itemIdArray);
-					self.getItemsModel(itemIdArray);
-					
-				}
+			var self = this
+			,	itemIdCount = 10
+			,	numOfItemIds = ids.length
+			,	promises = []
+			,	numOfCalls = numOfItemIds % itemIdCount == 0 ? Math.floor(numOfItemIds / itemIdCount) : Math.floor(numOfItemIds / itemIdCount) + 1;
+	
+			for (var i = 0; i < numOfCalls; i++) {
+				var itemIdArray = ids.slice(i * itemIdCount, (i+1)*itemIdCount)
+				,	promise = self.loadItemListModel(itemIdArray);
+	
+				promises.push(promise);
 			}
+			
+			jQuery.when.apply(jQuery, promises)
+		    .done(function() {
+
+		        var items = []
+		        
+		        for (var i = 0; i < arguments.length; i++) {
+		        	var item = arguments[i][0] ? arguments[i][0].items : arguments[i].items;
+		        	items = items.concat(item);
+		         }
+	
+		        var itemListModel = new OrderedItemModel({
+					data: ids.join()
+		        });
+
+		        itemListModel.set('items', items);
+		        view.itemListModel = itemListModel;
+		        
+		        self.appendItemList(itemListModel);
+				
+		    }).fail(function() {
+		        // something went wrong here, handle it
+		    });
 		}
 	
-	,	getItemsModel: function (itemIdArray)
+	,	loadItemListModel: function(itemIdArray) 
 		{
-			var self = this;
-			var modelData = self.translator.getApiParams();
-			modelData.id = itemIdArray.join(); 		// max 10 ids per call
+			var self = this
+			,	itemListModel = new OrderedItemModel(
+				{
+					data: itemIdArray.join()
+		        })
+			,	modelData = self.translator.getApiParams();
+			
+			modelData.id = itemIdArray.join();		// max 10 ids per call
 			modelData = _.omit(modelData, 'category');
 	
-			var itemListModel = new OrderedItemModel();
-			itemListModel.fetch({
+			return itemListModel.fetch({
 				data: modelData
 			,	killerId: this.application.killerId
-			,	pageGeneratorPreload: true }).then(function (data) {
-				
-				// data is unordered when returned, need to reorder in order of item list
-				/*
-				var orderedItems = [];
-				_.each(itemIdArray, function(id) {
-					var itemModel = _.find(itemListModel.get('items').models, function(itemModel) {
-						return itemModel.get('internalid') == id;
-					});
-					if (itemModel) {
-						orderedItems.push(itemModel);
-					}
-				});
-				
-				itemListModel.get('items').models = orderedItems;
-				*/
-				self.appendItemList(itemListModel);
-				
+			,	pageGeneratorPreload: true 			
 			});		
 		}
-			
-		// view.showContentItemList:
-		// Differs from showContent because itemListModel is already defined when this is called
-	,	showContentItemList: function ()
-		{
-			// If its a free text search it will work with the title
-			var keywords = this.translator.getOptionValue('keywords')
-			,	resultCount = this.model.get('total')
-			,	self = this;
-	
-			if (keywords)
-			{
-				keywords = decodeURIComponent(keywords);
-	
-				if (resultCount > 0)
-				{
-					this.subtitle =  resultCount > 1 ? _('Results for "$(0)"').translate(keywords) : _('Result for "$(0)"').translate(keywords);
-				}
-				else
-				{
-					this.subtitle = _('We couldn\'t find any items that match "$(0)"').translate(keywords);
-				}
-			}
-	
-			this.totalPages = Math.ceil(resultCount / this.translator.getOptionValue('show'));
-			// once the showContent is done the afterAppend is called
-			this.application.getLayout().showContent(this).done(function ()
-			{
-				//self.appendItemList(self.itemListModel);
-			});
-		}
-	
-		// view.getItemListModel:
-		// Get item list subrecord from ECQS category record
-	,	getItemListModel: function(currCategory) 
-		{
-			var self = this;
-			
-			if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
-				
-				var itemListModel = new FacetModel();
-	
-				var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
-					return val.custrecord_ecqs_catitem_item.internalid;
-				}).join();
-				
-				var modelData = self.translator.getApiParams();
-				modelData.id = ids; 		// max 10 ids per call
-				modelData = _.omit(modelData, 'category');
-
-				itemListModel.fetch({
-					data: modelData
-				,	killerId: this.application.killerId
-				,	pageGeneratorPreload: true }).then(function (data) {
-
-					self.appendItemList(itemListModel);
-					
-				});		
-			}
-		} 
-	
 
 		// view.renderFacets:
 		// Generates a new translator, grabs the facets of the model,
@@ -336,35 +254,6 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 		// Add Item List block to view 
 	,	appendItemList:function(itemListModel) 
 		{
-			/*
-			var self = this
-			, 	cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name;
-			
-			var displayOption = _.find(this.application.getConfig('itemsDisplayOptions'), function (option)
-			{
-				return option.id === self.translator.getOptionValue('display');
-			})
-			,	cellWrap = function cellWrap (item)
-			{
-				return SC.macros[displayOption.macro](item, self);
-			};
-			
-			if (itemListModel.get('items')) {
-				this.$('section[data-type="custom-item-list"]').each(function (i, div)
-				{
-					var $div = jQuery(div).empty();
-					
-					if (SC.macros[cellTemplate]) {
-						$div.append( SC.macros[cellTemplate](self, itemListModel));
-					} else {		// append generic item list view
-						$div.append( SC.macros['displayInRows'](itemListModel.get('items').models, cellWrap, displayOption.columns) );
-					}					
-				});
-			}
-			*/
-		
-			console.log('itemListModel', itemListModel);
-			
 			var self = this
 			, 	cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name
 			, 	itemListSection = self.$('section#item-list-container');
@@ -372,6 +261,33 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
 			if (SC.macros[cellTemplate]) {
 				itemListSection.append( SC.macros[cellTemplate](self, itemListModel));
 			}
+		}
+	
+	,	setMetaTags: function ()
+		{	
+			var metaTags = jQuery('<head/>').html(
+			jQuery.trim(
+					this.catModel.custrecord_ecqs_category_meta_tag_html
+				)
+			).children('meta');
+		
+			var description = _.findWhere(metaTags, {name:"description"});
+			var keywords = _.findWhere(metaTags, {name:"keywords"});
+
+			if (description) {
+				this.metaDescription = jQuery(description).attr('content');
+			}
+			
+			if (keywords) {
+				this.metaKeywords = jQuery(keywords).attr('content');
+			}
+
+			this.metaTags = metaTags;
+		}
+		
+	,	getMetaTags: function ()
+		{		
+			return this.metaTags;
 		}
 	});
 });

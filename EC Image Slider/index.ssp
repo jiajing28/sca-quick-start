@@ -1,10 +1,26 @@
 var head = document.getElementsByTagName("head")[0];
 
+/*
 loadScript([
 	'/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014d201f5396.js'
-,	'/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014d201f8d05.js'
-,	'/SCA-Quick-Start/EC-Image-Slider/js/Application-014d494d5d04.js'
+,	'/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014e31d408e1.js'
+,	'/SCA-Quick-Start/EC-Image-Slider/js/Application-014d786daa37.js'
 ]);
+*/
+
+loadScript({
+    url: '/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014d201f5396.js'
+,   seo_remove: true
+});
+loadScript({
+    url: '/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014e31d408e1.js'
+,   seo_remove: true
+});
+loadScript({
+    url: '/SCA-Quick-Start/EC-Image-Slider/js/Application-014d786daa37.js'
+,   seo_remove: true
+});
+
 
 var link = document.createElement('link');
 link.rel = 'stylesheet';

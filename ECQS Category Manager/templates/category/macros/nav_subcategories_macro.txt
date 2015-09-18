@@ -11,7 +11,7 @@
 		<ul>
 			<% _.each(subcategories, function (subcategory) { %>
 				<% 
-					var subcategoryModel = _.findWhere(ECQS.categories, {id : subcategory.custrecord_ecqs_subcat_child.internalid})
+					var subcategoryModel = _.findWhere(ECQS.categories, {id : parseInt(subcategory.custrecord_ecqs_subcat_child.internalid)})
 					,	subcategoryName = subcategoryModel.custrecord_ecqs_category_displayname || subcategoryModel.name
 					,	is_active = subcategoryModel ? subcategoryName == view.page_header : false;
 				%>

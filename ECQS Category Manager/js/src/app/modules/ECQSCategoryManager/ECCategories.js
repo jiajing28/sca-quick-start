@@ -28,13 +28,13 @@ Backbone.View.prototype.parent = Backbone.Model.prototype.parent = Backbone.Coll
 
 
 
-define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'ECCategories.Router', 'OrderedItems.Model'], function (Facets, FacetTranslator, Views, Router, Model)
+define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'ECCategories.Router'], function (Facets, FacetTranslator, Views, Router)
 {
 	'use strict';
 
 	var getUrl = function () {
-		var url = ''
-		,	self = this;
+		var url = '',
+			self = this;
 
 		// Prepears the seo limits
 		var facets_seo_limits = {};
@@ -140,7 +140,7 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 		url += (tmp_options_vals.length) ? this.configuration.facetDelimiters.betweenFacetsAndOptions + tmp_options_vals.join(this.configuration.facetDelimiters.betweenDifferentOptions) : '';
 
 		return _(url).fixUrl();
-	}
+	};
 	
 	var parseUrl = function (url) {
 
@@ -215,20 +215,20 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 
 		this.parseUrlOptions(tmp_options);
 		
-	}
+	};
 	
 	
 	var ECCategories = {
-		Model:  Model
-	,	Router : Router
+		Router : Router
 	,	View : Views
 	,	mountToApp: function (application) 
 		{
 			// Set up custom routing for all ECQS category pages
 			application.on('afterModulesLoaded', function ()
 			{
-				var query = ''
-				,	categoryUrls = _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))
+				Facets.setTranslatorConfig && Facets.setTranslatorConfig(application);
+				
+				var categoryUrls = _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))
 				,	facets_data = application.getConfig('siteSettings.facetfield')
 				,	facets_to_include = [];
 	
@@ -250,21 +250,18 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 				,	_.pluck(application.translatorConfig.facets, 'url') || []
 				));
 	
-				var routerInstance = new ECCategories.Router(application);
+				var routerInstance = new Router(application);
 				
 				_.each(categoryUrls, function (category_page)
 				{
 					// Generate the regexp and adds it to the instance of the router
-					var facet_regex = '^\\b(' + category_page + '+)\\b((' + components.join('|.*') + ')*)\\b(.*?)$';	
+					var facet_regex = '^\\b(' + category_page + '+)\\b((' + components.join('|.*') + ')*)([?].*$|$)';	
 					
-					ECCategories.Router.prototype.routes[category_page + '?*options'] = 'ecCategoryByUrl';
-					ECCategories.Router.prototype.routes[category_page] = 'ecCategoryByUrl';
+					Router.prototype.routes[category_page + '?*options'] = 'ecCategoryByUrl';
+					Router.prototype.routes[category_page] = 'ecCategoryByUrl';
 	
 					routerInstance.route(new RegExp(facet_regex), 'ecCategoryByUrl');
 				});
-				
-				// Wires some config to the model
-				Model.mountToApp(application);
 	
 				return routerInstance;
 			});

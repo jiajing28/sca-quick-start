@@ -12,10 +12,9 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 			this.translatorConfig = application.translatorConfig;
 		}
 		
-	,	ecCategoryByUrl: function () 
+	,	ecCategoryByUrl: function (url) 
 		{
 			var self= this
-			,	url = Backbone.history.getFragment()
 			,	translator = FacetHelper.parseUrl(url, this.translatorConfig)
 			,	category = translator.getFacetValue('category')
 			,	currCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : category}) || [];		// Find matching ECQS category record from NS
@@ -35,14 +34,14 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 			if (currCategory.custrecord_ecqs_category_facet) {
 				
 				var facetTranslator = FacetHelper.parseUrl(currCategory.custrecord_ecqs_category_facet, this.translatorConfig);
+
+				// remove category facet or results will be empty since we're using ECQS categories
+				var modelTranslator = translator.cloneWithoutFacetId('category');
 				
 				// duplicate facet settings from the facet field on the ECQS category record to our translator
 				_.each(facetTranslator.facets, function(facet) {
-					translator = translator.cloneForFacetId(facet.id, facet.value);
+					modelTranslator.facets = modelTranslator.cloneForFacetId(facet.id, facet.value).facets;
 				});
-				
-				// remove category facet or results will be empty since we're using ECQS categories
-				var modelTranslator = translator.cloneWithoutFacetId('category');
 				
 				if (currCategory.recmachcustrecord_ecqs_catitem_cat) {
 					var ids = _.map(currCategory.recmachcustrecord_ecqs_catitem_cat, function(val, key) {
@@ -50,31 +49,31 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 					});
 					view.catModel.itemIds = ids;
 				}
-				
+
 				model.fetch({
 					data: modelTranslator.getApiParams()
-					,	killerId: this.application.killerId
-					,	pageGeneratorPreload: true }).then(function (data) {
+				,	killerId: this.application.killerId
+				,	pageGeneratorPreload: true }).then(function (data) {
 
-						if (data.corrections && data.corrections.length > 0)
-						{
-							var unaliased_url = self.unaliasUrl(url, data.corrections);
+					if (data.corrections && data.corrections.length > 0)
+					{
+						var unaliased_url = self.unaliasUrl(url, data.corrections);
 
-							if (SC.ENVIRONMENT.jsEnvironment === 'server')
-							{			
-								nsglobal.statusCode = 301;
-								nsglobal.location = '/' + unaliased_url;
-							}
-							else
-							{
-								Backbone.history.navigate('#' + unaliased_url, {trigger: true});
-							}
+						if (SC.ENVIRONMENT.jsEnvironment === 'server')
+						{			
+							nsglobal.statusCode = 301;
+							nsglobal.location = '/' + unaliased_url;
 						}
 						else
 						{
-							translator.setLabelsFromFacets(model.get('facets') || []);
-							view.showContent(true);
+							Backbone.history.navigate('#' + unaliased_url, {trigger: true});
 						}
+					}
+					else
+					{
+						translator.setLabelsFromFacets(model.get('facets') || []);
+						view.showContent(true);
+					}
 				});
 				
 			// if category has item list field set
@@ -84,44 +83,61 @@ define('ECCategories.Router', ['Facets.Helper', 'Facets.Model', 'ECCategories.Vi
 					return val.custrecord_ecqs_catitem_item.internalid;
 				});
 				
-				var modelData = translator.getApiParams()
-				,	firstTenIds = _.first(ids, 10); 		
-				modelData.id = firstTenIds.join();		// max 10 ids per call
-				modelData = _.omit(modelData, 'category');
+				var itemIdCount = 10
+				,	numOfItemIds = ids.length
+				,	promises = []
+				,	numOfCalls = numOfItemIds % itemIdCount == 0 ? Math.floor(numOfItemIds / itemIdCount) : Math.floor(numOfItemIds / itemIdCount) + 1;
+				
+				for (var i = 0; i < numOfCalls; i++) {
+					var itemIdArray = ids.slice(i * itemIdCount, (i+1)*itemIdCount)
+					,	promise = self.loadItemListModel(itemIdArray, translator);
 
-				itemListModel.fetch({
-					data: modelData
-				,	killerId: this.application.killerId
-				,	pageGeneratorPreload: true }).then(function (data) {
+					promises.push(promise);
+				}
+				
+				jQuery.when.apply(jQuery, promises)
+			    .done(function() {
+			        
+			        var items = []
+			        
+			        for (var i = 0; i < arguments.length; i++) {
+			        	var item = arguments[i][0] ? arguments[i][0].items : arguments[i].items;
+			        	items = items.concat(item);
+			         }
 
-					// data is unordered when returned, need to reorder in order of item list
-					/*
-					var orderedItems = [];
-					_.each(firstTenIds, function(id) {
-						var itemModel = _.find(itemListModel.get('items').models, function(itemModel) {
-							return itemModel.get('internalid') == id;
-						});
-						if (itemModel) {
-							orderedItems.push(itemModel);
-						}
-					});
-					*/
-					console.log('firstTenIds', firstTenIds);
-					console.log('modelData', modelData);
-					console.log('itemListModel', itemListModel);
-					console.log('model', model);
-					view.model.set("items", []);
-					//itemListModel.get('items').models = orderedItems;
-					view.catModel.itemIds = ids;
-					view.itemListModel = itemListModel;
-					//view.showContentItemList();
+			        var itemListModel = new OrderedItemModel({
+						data: ids.join()
+			        });
+
+			        itemListModel.set('items', items);
+			        view.itemListModel = itemListModel;
 					view.showContent(false);
 					
-				});		
+			    }).fail(function() {
+			        // something went wrong here, handle it
+			    });
 				
 			} else {
 				view.showContent();
 			}
+		}
+	
+	,	loadItemListModel: function(itemIdArray, translator) 
+		{
+			var itemListModel = new OrderedItemModel(
+				{
+					data: itemIdArray.join()
+		        })
+			,	modelData = translator.getApiParams();
+			
+			modelData.id = itemIdArray.join();		// max 10 ids per call
+			modelData = _.omit(modelData, 'category');
+
+			return itemListModel.fetch({
+				data: modelData
+			,	killerId: this.application.killerId
+			,	pageGeneratorPreload: true 			
+			});		
 		}
 	});
 });

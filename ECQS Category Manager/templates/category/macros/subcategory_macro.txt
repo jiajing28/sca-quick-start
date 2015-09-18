@@ -1,8 +1,8 @@
 <% registerMacro('subcategoryCell', function (id, view) { %>
 <%
-	var subcategoryModel = _.findWhere(ECQS.categories, {id : id});
+	var subcategoryModel = _.findWhere(ECQS.categories, {id : parseInt(id)});
 	var application = view.application;
-	var thumbnail = subcategoryModel.columns.custrecord_ecqs_category_thumbnail ? subcategoryModel.columns.custrecord_ecqs_category_thumbnail.name : '';
+	var thumbnail = subcategoryModel.custrecord_ecqs_category_thumbnail ? subcategoryModel.custrecord_ecqs_category_thumbnail.name : '';
 	
 %>
 

@@ -1,11 +1,16 @@
 <project info="SuiteCloud IDE generated file, do not edit." setAttributesOnUpdate="false">
   <folder name="EC Image Slider" bundleable="false">
     <folder name="js" bundleable="false">
-      <folder name="libs" bundleable="false" exclude="false">
+      <folder name="libs" bundleable="false">
+        <folder name="owl.carousel.2" bundleable="false">
+          <file name="owl.carousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+          <file name="owl.carousel.min.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+        </folder>
         <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
           <description></description>
           <altTagCaption></altTagCaption>
         </file>
+        <file name="current.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       </folder>
       <folder name="src" bundleable="false">
         <folder name="app" bundleable="false">
@@ -31,16 +36,23 @@
           </folder>
         </folder>
       </folder>
+      <file name="Starter.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+      <file name="current.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
     <folder name="services" bundleable="false">
       <file name="ecqsGetSlider.ss" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
     <folder name="skins" bundleable="false">
+      <folder name="owl.carousel.2" bundleable="false">
+        <file name="owl.carousel.css" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+        <file name="owl.theme.default.min.css" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+      </folder>
       <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
         <altTagCaption></altTagCaption>
       </file>
+      <file name="current-css.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="global.css" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
     <folder name="templates" bundleable="false">
@@ -56,6 +68,7 @@
           <altTagCaption>EC_home_tmpl</altTagCaption>
         </file>
       </folder>
+      <file name="current.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="home_alt.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
         <altTagCaption>home_tmpl</altTagCaption>

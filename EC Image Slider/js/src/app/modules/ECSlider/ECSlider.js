@@ -38,5 +38,8 @@ define('ECSlider', function()
 		
 		SC.compileMacros(SC.templates.macros);
 	}
-	application.Configuration.modules.push('ECSlider');
+	
+	if (application.Configuration.modules) {
+		application.Configuration.modules.push('ECSlider');
+	}
 })(SC.Application('Shopping'));

@@ -9,8 +9,6 @@
 	,	itemListItems = hasItemList ? view.itemListModel.get('items') : null
 	,	subcategories = catModel.recmachcustrecord_ecqs_subcat_parent || null
 	,	cellTemplate = catModel.custrecord_ecqs_category_tmpl_cell.name;
-	
-	console.log('VIEW', view);
 %>
 <div data-cms-area="item_list_banner" data-cms-area-filters="page_type"></div>
 <div class="view-header" itemscope itemtype="http://schema.org/WebPage">

@@ -105,5 +105,7 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 
 (function(application)
 {
-	application.Configuration.modules.push('OwlCarousel');
+	if (application.Configuration.modules) {
+		application.Configuration.modules.push('OwlCarousel');
+	}
 })(SC.Application('Shopping'));
