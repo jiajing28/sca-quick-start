@@ -28,7 +28,7 @@ Backbone.View.prototype.parent = Backbone.Model.prototype.parent = Backbone.Coll
 
 
 
-define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'ECCategories.Router'], function (Facets, FacetTranslator, Views, Router)
+define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'ECCategories.Router', 'OrderedItems.Model'], function (Facets, FacetTranslator, Views, Router,  OrderedItemModel)
 {
 	'use strict';
 
@@ -219,10 +219,14 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 	
 	
 	var ECCategories = {
-		Router : Router
+		Model : OrderedItemModel
+	,	Router : Router
 	,	View : Views
 	,	mountToApp: function (application) 
 		{
+			// Wires some config to the model
+			OrderedItemModel.mountToApp(application);
+		
 			// Set up custom routing for all ECQS category pages
 			application.on('afterModulesLoaded', function ()
 			{
