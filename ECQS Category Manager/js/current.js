@@ -1,1 +1,1 @@
-BDQ.currentTemplatesUrl = '/Web Site Hosting Files/Live Hosting Files/SCA-Quick-Start/ECQS-Category-Manager/js/Application-014e321f72c0.js';
+BDQ.currentTemplatesUrl = '/Web Site Hosting Files/Live Hosting Files/SCA-Quick-Start/ECQS-Category-Manager/js/Application-014f4c92ba4e.js';

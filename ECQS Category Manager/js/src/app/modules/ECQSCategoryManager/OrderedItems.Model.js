@@ -36,6 +36,11 @@ define('OrderedItems.Model', ['ItemDetails.Collection', 'Session'], function (It
 			{
 				if (!(items instanceof ItemDetailsCollection))
 				{
+					// Removes unavailable items, when doing item search api without facets, these items are not excluded
+					items = _.reject(items, function(item) {
+						return item && !item.internalid;
+					});
+					
 					// NOTE: Compact is used to filter null values from response
 					model.set('items', new ItemDetailsCollection(_.compact(items)));
 				}

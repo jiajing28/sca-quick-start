@@ -3,268 +3,360 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
     'use strict';
 
     var statuses = window.statuses = {}
-        ,	collapsable_elements = window.collapsable_elements = {};
+    ,	collapsable_elements = window.collapsable_elements = {};
 
     return FacetViews.Browse.extend({
 
         title: ''
-        ,	page_header: ''
-        ,	template: 'facet_browse'
+    ,	page_header: ''
+    ,	template: 'facet_browse'
+    ,	events: 
+		{
+    		'scroll' : 	'detect_scroll'
+		}
+    
+    ,	initialize: function (options)
+	    {
+	        this.application = options.application;
+	        this.catModel = options.catModel;
+	        this.itemListModel = options.itemListModel;
+	        this.translator = options.translator;
+	        this.title = this.catModel.custrecord_ecqs_category_page_title;
+	        this.page_header = this.catModel.custrecord_ecqs_category_displayname || this.catModel.name;
+	        this.setMetaTags();
+	
+	        this.statuses = statuses;
+	        this.collapsable_elements = collapsable_elements;
+	
+	        this.template = this.catModel.custrecord_ecqs_category_tmpl_page ? this.catModel.custrecord_ecqs_category_tmpl_page.name : this.template;
+	
+	        this.collapsable_elements['facet-header'] = this.collapsable_elements['facet-header'] || {
+	            selector: 'this.collapsable_elements["facet-header"]'
+	            ,	collapsed: false
+	        };
+	
+	        this.parent('inherit', this.options);			// inherit options from Facets.Views.js
+	        
+	        this.currentPage = 1;
+			
+			_.bindAll(this, 'detect_scroll');	
+			jQuery(window).scroll(this.detect_scroll);
+	    }
+    
+    ,	detect_scroll: function() 
+	    {
+			
+			if (jQuery(document).find('#facet-browse').size() <= 0) {
+				 jQuery(window).off('scroll', this.detect_scroll);				 
+			} else {
+				var self = this
+				,	triggerPoint = 300 // 300px from the bottom
+				,	current_page = this.currentPage;
+	
+				//console.log('ec cm detect_scroll', self.catModel.type);
+				
+				if( !this.isLoading && this.el.scrollTop + this.el.clientHeight + triggerPoint > this.el.scrollHeight && !jQuery('body').hasClass('modal-open')) {
+	
+			       this.currentPage ++; // Load next page
+			       
+			       if (self.catModel.type == 'itemList') {
+			    	   self.loadItemList();
+			       }
+			       
+	
+			   } 
+			}
+		}
 
-        ,	initialize: function (options)
-        {
-            this.application = options.application;
-            this.catModel = options.catModel;
-            this.itemListModel = options.itemListModel;
-            this.translator = options.translator;
-            this.title = this.catModel.custrecord_ecqs_category_page_title;
-            this.page_header = this.catModel.custrecord_ecqs_category_displayname || this.catModel.name;
-            this.setMetaTags();
+    ,	loadItemList: function() 
+	    {
+	    	var self = this
+			,	itemIdCount = 10
+			,	numOfItemIds = self.catModel.itemIds.length
+			,	ids = self.catModel.itemIds
+			,	initItemLoadCount = self.catModel.initItemLoadCount
+			,	startIndex = (this.currentPage - 2) * itemIdCount + initItemLoadCount
+			,	endIndex = (this.currentPage - 1) * itemIdCount + initItemLoadCount;
+	
+			this.isLoading = true; 
+			
+			console.log('index = ' + startIndex + ' - ' + endIndex);
+			
+			var itemIdArray = ids.slice(startIndex, endIndex);
+			
+			console.log('itemIdArray', itemIdArray);
+			
+			if (itemIdArray.length > 0) {
+				var itemListModel = new OrderedItemModel(
+					{
+						data: itemIdArray.join()
+			        })
+				,	modelData = self.translator.getApiParams();
+				
+				modelData.id = itemIdArray.join();		// max 10 ids per call
+				modelData = _.omit(modelData, 'category');
+	
+				itemListModel.fetch({
+					data: modelData
+				,	killerId: this.application.killerId
+				,	pageGeneratorPreload: true}).then(function (data) {
+						
+						//console.log('itemListModel.fetch', itemListModel);
+						//console.log('itemListModel.fetch data', data);
+					
+						self.appendItemList(itemListModel);	 
+						self.isLoading = false;
+				});		
+			}
+	    }
+    
+    // view.getBreadcrumb:
+    // It will generate an array suitable to pass it to the breadcrumb macro
+    ,	getBreadcrumb: function ()
+	    {
+	        var category_string = ''
+	            ,	breadcrumb = [{
+	                href: '/'
+	                ,	text: _('Home').translate()
+	            }];
+	
+	        // CUSTOMIZATION
+	        // iterate through breadcrumbs from ECQS category record and add to breadcrumbs
+	        for (var i = 1; i <= 5; i++) {
+	            if (this.catModel['custrecord_ecqs_category_crumb_'+i]) {
+	                var categoryId = this.catModel['custrecord_ecqs_category_crumb_'+i].internalid;
+	                var breadcrumbCat = _.find(ECQS.categories,  function(e) { return e.id == categoryId });
+	                category_string += breadcrumbCat.custrecord_ecqs_category_url + '/';
+	            }
+	        }
+	        category_string += this.translator.getFacetValue('category');
+	
+	        if (category_string)
+	        {
+	            var category_path = '';
+	
+	            var tokens = category_string && category_string.split('/') || [];
+	            if (tokens.length && tokens[0] === '')
+	            {
+	                tokens.shift();
+	            }
+	
+	            _.each(tokens, function (cat)
+	            {
+	                var thisCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : cat });
+	                category_path = '/'+cat;
+	                breadcrumb.push({
+	                    href: category_path
+	                    ,	text: _(thisCategory.custrecord_ecqs_category_displayname || thisCategory.name).translate()
+	                    ,	categoryId: thisCategory.id
+	                });
+	            });
+	        }
+	        else if (this.translator.getOptionValue('keywords'))
+	        {
+	            breadcrumb.push({
+	                href: '#'
+	                ,	text: _('Search Results').translate()
+	            });
+	        }
+	        else
+	        {
+	            breadcrumb.push({
+	                href: '#'
+	                ,	text: _('Shop').translate()
+	            });
+	        }
+	
+	        return breadcrumb;
+	    }
 
-            this.statuses = statuses;
-            this.collapsable_elements = collapsable_elements;
+    // view.showContent:
+    // Works with the title to find the proper wording and calls the layout.showContent
+    ,	showContent: function ()
+	    {
+	        // If its a free text search it will work with the title
+	        var keywords = this.translator.getOptionValue('keywords')
+	        ,	resultCount = this.model.get('total')
+	        ,	self = this
+	        ,	categoryType = (self.catModel) ? self.catModel.type : 'facet';
+	
+	        if (keywords)
+	        {
+	            keywords = decodeURIComponent(keywords);
+	
+	            if (resultCount > 0)
+	            {
+	                this.subtitle =  resultCount > 1 ? _('Results for "$(0)"').translate(keywords) : _('Result for "$(0)"').translate(keywords);
+	            }
+	            else
+	            {
+	                this.subtitle = _('We couldn\'t find any items that match "$(0)"').translate(keywords);
+	            }
+	        }
+	
+	        this.totalPages = Math.ceil(resultCount / this.translator.getOptionValue('show'));
+	
+	        // once the showContent is done the afterAppend is called
+	        this.application.getLayout().showContent(this).done(function ()
+	        {
+	            if (categoryType == 'facet') {
+					// Looks for placeholders and injects the facets
+					self.renderFacets(self.translator.getUrl());
+					
+					// CUSTOMIZATION
+					// add item list block 
+					if (self.catModel.itemIds) {
+						self.getAllItemList();
+					}
+			    } else if (self.catModel.type == 'itemList') {
+			    	console.log('load page 2!!');
+			    	self.currentPage = 2; // Load next page
+			    	self.loadItemList();
+			    }
+	        });
+	    }
 
-            this.template = this.catModel.custrecord_ecqs_category_tmpl_page ? this.catModel.custrecord_ecqs_category_tmpl_page.name : this.template;
+    ,	getAllItemList: function()
+	    {
+	    	var self = this
+			,	itemIdCount = 10
+			,	numOfItemIds = self.catModel.itemIds.length
+			,	ids = self.catModel.itemIds
+			,	promises = []
+			,	numOfCalls = numOfItemIds % itemIdCount == 0 ? Math.floor(numOfItemIds / itemIdCount) : Math.floor(numOfItemIds / itemIdCount) + 1;
+	
+			for (var i = 0; i < numOfCalls; i++) {
+				var itemIdArray = ids.slice(i * itemIdCount, (i+1)*itemIdCount)
+				,	promise = self.loadItemListModel(itemIdArray);
+	
+				promises.push(promise);
+			}
+			
+			jQuery.when.apply(jQuery, promises)
+		    .done(function() {
+		    	
+		        console.log("All done!") // do other stuff
+		        
+		        var items = []
+		        
+		        for (var i = 0; i < arguments.length; i++) {
+		        	//console.log("argument",arguments[i]);
+		        	var item = arguments[i][0] ? arguments[i][0].items : arguments[i].items;
+		        	items = items.concat(item);
+		         }
+	
+		        var itemListModel = new OrderedItemModel({
+					data: ids.join()
+		        });
+		        
+		        console.log('itemListModel', itemListModel);
+		        
+		        itemListModel.set('items', items);
+		        self.itemListModel = itemListModel;
+		        
+		        self.appendItemList(itemListModel);
+				
+		    }).fail(function() {
+		        // something went wrong here, handle it
+		    });
+	    }
 
-            this.collapsable_elements['facet-header'] = this.collapsable_elements['facet-header'] || {
-                selector: 'this.collapsable_elements["facet-header"]'
-                ,	collapsed: false
-            };
+    ,	loadItemListModel: function(itemIdArray)
+	    {
+	    	var self = this
+			,	itemListModel = new OrderedItemModel(
+				{
+					data: itemIdArray.join()
+		        })
+			,	modelData = self.translator.getApiParams();
+			
+			modelData.id = itemIdArray.join();		// max 10 ids per call
+			modelData = _.omit(modelData, 'category');
+	
+			return itemListModel.fetch({
+				data: modelData
+			,	killerId: this.application.killerId
+			,	pageGeneratorPreload: true 			
+			});	
+	    }
 
-            this.parent('inherit', this.options);			// inherit options from Facets.Views.js
-        }
+    // view.renderFacets:
+    // Generates a new translator, grabs the facets of the model,
+    // look for elements with data-type="facet" or data-type="all-facets"
+    // and then execute all the macros and injects the results in the elements
+    ,	renderFacets: function (url)
+		{
+		    var self = this
+		        ,	translator = this.translator		// CUSTOMIZATION: pull from translator passed into view instead of creating new translator from url
+		        ,	facets = this.model.get('facets') || [];
+		
+		
+		    this.$('div[data-type="facet"]').each(function (i, nav)
+		    {
+		        var $nav = jQuery(nav).empty()
+		            ,	facet_id = $nav.data('facet-id')
+		            ,	facet_config = translator.getFacetConfig( facet_id )
+		            ,	facet_macro = $nav.data('facet-macro') || facet_config.macro || self.application.getConfig('macros.facet')
+		            ,	facet = _.find(facets, function (facet) {
+		                return facet.id === facet_id;
+		            });
+		
+		        $nav.append( SC.macros[ facet_macro ](translator, facet_config, facet) );
+		    });
+		
+		    this.$('div[data-type="all-facets"]').each(function (i, nav)
+		    {
+		        var $nav = jQuery(nav).empty()
+		            ,	exclude = _.map( ( $nav.data('exclude-facets') || '').split(','), function (result) {
+		                return jQuery.trim( result );
+		            })
+		            ,	ordered_facets = facets && facets.sort(function (a, b) {
+		                    // Default Prioriry is 0
+		                    return (translator.getFacetConfig(b.id).priority || 0) - (translator.getFacetConfig(a.id).priority || 0);
+		                })
+		            ,	content = '';
+		
+		        _.each(ordered_facets, function (facet)
+		        {
+		            var facet_config = translator.getFacetConfig(facet.id);
+		            if ( !_.contains(exclude, facet.id) )
+		            {
+		                content += SC.macros[facet_config.macro || self.application.getConfig('macros.facet')](translator, facet_config, facet);
+		            }
+		        });
+		
+		        $nav.append( content );
+		    });
+		
+		
+		    this.$('[data-toggle="collapse"]').each(function (index, collapser)
+		    {
+		        self.fixStatus(collapser);
+		    });
+		
+		    this.$('[data-toggle="slider"]').slider();
+		}
 
-        // view.getBreadcrumb:
-        // It will generate an array suitable to pass it to the breadcrumb macro
-        ,	getBreadcrumb: function ()
-        {
-            var category_string = ''
-                ,	breadcrumb = [{
-                    href: '/'
-                    ,	text: _('Home').translate()
-                }];
+    // view.appendItemList:
+    // Add Item List block to view
+    ,	appendItemList:function(itemListModel)
+	    {
+	        var self = this
+	            , 	cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name
+	            , 	itemListSection = self.$('section#item-list-container');
+	
+	        if (SC.macros[cellTemplate]) {
+	            itemListSection.append( SC.macros[cellTemplate](self, itemListModel));
+	        }
+	        
+	        if (itemListSection.children().length == 0) {
+				console.log('still empty? load more pages');
+				self.currentPage ++; // Load next page
+				self.loadItemList();
+			}
+	    }
 
-            // CUSTOMIZATION
-            // iterate through breadcrumbs from ECQS category record and add to breadcrumbs
-            for (var i = 1; i <= 5; i++) {
-                if (this.catModel['custrecord_ecqs_category_crumb_'+i]) {
-                    var categoryId = this.catModel['custrecord_ecqs_category_crumb_'+i].internalid;
-                    var breadcrumbCat = _.find(ECQS.categories,  function(e) { return e.id == categoryId });
-                    category_string += breadcrumbCat.custrecord_ecqs_category_url + '/';
-                }
-            }
-            category_string += this.translator.getFacetValue('category');
-
-            if (category_string)
-            {
-                var category_path = '';
-
-                var tokens = category_string && category_string.split('/') || [];
-                if (tokens.length && tokens[0] === '')
-                {
-                    tokens.shift();
-                }
-
-                _.each(tokens, function (cat)
-                {
-                    var thisCategory = _.findWhere(ECQS.categories, {custrecord_ecqs_category_url : cat });
-                    category_path = '/'+cat;
-                    breadcrumb.push({
-                        href: category_path
-                        ,	text: _(thisCategory.custrecord_ecqs_category_displayname || thisCategory.name).translate()
-                    });
-                });
-            }
-            else if (this.translator.getOptionValue('keywords'))
-            {
-                breadcrumb.push({
-                    href: '#'
-                    ,	text: _('Search Results').translate()
-                });
-            }
-            else
-            {
-                breadcrumb.push({
-                    href: '#'
-                    ,	text: _('Shop').translate()
-                });
-            }
-
-            return breadcrumb;
-        }
-
-        // view.showContent:
-        // Works with the title to find the proper wording and calls the layout.showContent
-        ,	showContent: function (showFacets)
-        {
-            // If its a free text search it will work with the title
-            var keywords = this.translator.getOptionValue('keywords')
-            ,	resultCount = this.model.get('total')
-            ,	self = this;
-
-            if (keywords)
-            {
-                keywords = decodeURIComponent(keywords);
-
-                if (resultCount > 0)
-                {
-                    this.subtitle =  resultCount > 1 ? _('Results for "$(0)"').translate(keywords) : _('Result for "$(0)"').translate(keywords);
-                }
-                else
-                {
-                    this.subtitle = _('We couldn\'t find any items that match "$(0)"').translate(keywords);
-                }
-            }
-
-            this.totalPages = Math.ceil(resultCount / this.translator.getOptionValue('show'));
-
-            // once the showContent is done the afterAppend is called
-            this.application.getLayout().showContent(this).done(function ()
-            {
-                if (showFacets) {
-                    // Looks for placeholders and injects the facets
-                    self.renderFacets(self.translator.getUrl());
-
-                    // CUSTOMIZATION
-                    // add item list block
-                    if (self.catModel.itemIds) {
-                        self.getAllItemList();
-                    }
-
-                }
-            });
-        }
-
-        ,	getAllItemList: function()
-        {
-            var self = this
-            ,	itemIdCount = 10
-                ,   ids = self.catModel.itemIds
-            ,	numOfItemIds = ids.length
-            ,	promises = []
-            ,	numOfCalls = numOfItemIds % itemIdCount == 0 ? Math.floor(numOfItemIds / itemIdCount) : Math.floor(numOfItemIds / itemIdCount) + 1;
-
-            for (var i = 0; i < numOfCalls; i++) {
-                var itemIdArray = ids.slice(i * itemIdCount, (i+1)*itemIdCount)
-                    ,	promise = self.loadItemListModel(itemIdArray);
-
-                promises.push(promise);
-            }
-
-            jQuery.when.apply(jQuery, promises)
-                .done(function() {
-
-                    var items = []
-
-                    for (var i = 0; i < arguments.length; i++) {
-                        var item = arguments[i][0] ? arguments[i][0].items : arguments[i].items;
-                        items = items.concat(item);
-                    }
-
-                    var itemListModel = new OrderedItemModel({
-                        data: ids.join()
-                    });
-
-                    itemListModel.set('items', items);
-                    self.itemListModel = itemListModel;
-
-                    self.appendItemList(itemListModel);
-
-                }).fail(function() {
-                    // something went wrong here, handle it
-                });
-        }
-
-        ,	loadItemListModel: function(itemIdArray)
-        {
-            var self = this
-                ,	itemListModel = new OrderedItemModel(
-                    {
-                        data: itemIdArray.join()
-                    })
-                ,	modelData = self.translator.getApiParams();
-
-            modelData.id = itemIdArray.join();		// max 10 ids per call
-            modelData = _.omit(modelData, 'category');
-
-            return itemListModel.fetch({
-                data: modelData
-                ,	killerId: this.application.killerId
-                ,	pageGeneratorPreload: true
-            });
-        }
-
-        // view.renderFacets:
-        // Generates a new translator, grabs the facets of the model,
-        // look for elements with data-type="facet" or data-type="all-facets"
-        // and then execute all the macros and injects the results in the elements
-        ,	renderFacets: function (url)
-        {
-            var self = this
-                ,	translator = this.translator		// CUSTOMIZATION: pull from translator passed into view instead of creating new translator from url
-                ,	facets = this.model.get('facets') || [];
-
-
-            this.$('div[data-type="facet"]').each(function (i, nav)
-            {
-                var $nav = jQuery(nav).empty()
-                    ,	facet_id = $nav.data('facet-id')
-                    ,	facet_config = translator.getFacetConfig( facet_id )
-                    ,	facet_macro = $nav.data('facet-macro') || facet_config.macro || self.application.getConfig('macros.facet')
-                    ,	facet = _.find(facets, function (facet) {
-                        return facet.id === facet_id;
-                    });
-
-                $nav.append( SC.macros[ facet_macro ](translator, facet_config, facet) );
-            });
-
-            this.$('div[data-type="all-facets"]').each(function (i, nav)
-            {
-                var $nav = jQuery(nav).empty()
-                    ,	exclude = _.map( ( $nav.data('exclude-facets') || '').split(','), function (result) {
-                        return jQuery.trim( result );
-                    })
-                    ,	ordered_facets = facets && facets.sort(function (a, b) {
-                            // Default Prioriry is 0
-                            return (translator.getFacetConfig(b.id).priority || 0) - (translator.getFacetConfig(a.id).priority || 0);
-                        })
-                    ,	content = '';
-
-                _.each(ordered_facets, function (facet)
-                {
-                    var facet_config = translator.getFacetConfig(facet.id);
-                    if ( !_.contains(exclude, facet.id) )
-                    {
-                        content += SC.macros[facet_config.macro || self.application.getConfig('macros.facet')](translator, facet_config, facet);
-                    }
-                });
-
-                $nav.append( content );
-            });
-
-
-            this.$('[data-toggle="collapse"]').each(function (index, collapser)
-            {
-                self.fixStatus(collapser);
-            });
-
-            this.$('[data-toggle="slider"]').slider();
-        }
-
-        // view.appendItemList:
-        // Add Item List block to view
-        ,	appendItemList:function(itemListModel)
-        {
-            var self = this
-                , 	cellTemplate = self.catModel.custrecord_ecqs_category_tmpl_cell.name
-                , 	itemListSection = self.$('section#item-list-container');
-
-            if (SC.macros[cellTemplate]) {
-                itemListSection.append( SC.macros[cellTemplate](self, itemListModel));
-            }
-        }
-
-        ,	setMetaTags: function ()
+    ,	setMetaTags: function ()
         {
             var metaTags = jQuery('<head/>').html(
                 jQuery.trim(
@@ -286,7 +378,7 @@ define('ECCategories.Views', ['Facets.Model', 'Facets.Views', 'OrderedItems.Mode
             this.metaTags = metaTags;
         }
 
-        ,	getMetaTags: function ()
+    ,	getMetaTags: function ()
         {
             return this.metaTags;
         }

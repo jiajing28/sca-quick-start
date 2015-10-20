@@ -33,8 +33,8 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 	'use strict';
 
 	var getUrl = function () {
-		var url = '',
-			self = this;
+		var url = ''
+		,	self = this;
 
 		// Prepears the seo limits
 		var facets_seo_limits = {};
@@ -224,13 +224,9 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 	,	View : Views
 	,	mountToApp: function (application) 
 		{
-			// Wires some config to the model
-			OrderedItemModel.mountToApp(application);
-		
 			// Set up custom routing for all ECQS category pages
 			application.on('afterModulesLoaded', function ()
 			{
-				Facets.setTranslatorConfig && Facets.setTranslatorConfig(application);
 				
 				var categoryUrls = _.compact(_.pluck(ECQS.categories, 'custrecord_ecqs_category_url'))
 				,	facets_data = application.getConfig('siteSettings.facetfield')
@@ -267,6 +263,9 @@ define('ECCategories', ['Facets', 'Facets.Translator', 'ECCategories.Views', 'EC
 					routerInstance.route(new RegExp(facet_regex), 'ecCategoryByUrl');
 				});
 	
+				// Wires some config to the model
+				OrderedItemModel.mountToApp(application);
+				
 				return routerInstance;
 			});
 			

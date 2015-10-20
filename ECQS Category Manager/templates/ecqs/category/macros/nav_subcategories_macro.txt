@@ -1,11 +1,13 @@
 <% registerMacro('navSubcategories', function (view, subcategories) { %>
 <%
-	var has_subcategories = subcategories && subcategories.length > 0;
+	var has_subcategories = subcategories && subcategories.length > 0
+	,	catModelUrl = view.catModel.custrecord_ecqs_category_url ? '/' + view.catModel.custrecord_ecqs_category_url : ''
+	,	catModelDisplayName = view.catModel.custrecord_ecqs_category_displayname || view.catModel.name;
 %>
 <% if (has_subcategories) { %>
 <div class="well faceted-navigation">
 	<div class="well-header facet-list-header">
-		<%= _(view.catModel.name).translate() %>
+		<%= _(catModelDisplayName).translate() %>
 	</div>
 	<div class="well-body">
 		<ul>
@@ -17,7 +19,7 @@
 				%>
 				<li class="<%= is_active  ? 'active' : 'inactive' %>">			
 					<% if (subcategoryModel.custrecord_ecqs_category_url) { %>
-						<a href="/<%= subcategoryModel.custrecord_ecqs_category_url %>"><%= subcategoryName %></a>
+						<a <%= _.objectToAtrributes({href: '/' + subcategoryModel.custrecord_ecqs_category_url, data: {touchpoint: 'home',	hashtag: '#' + subcategoryModel.custrecord_ecqs_category_url}}) %>><%= subcategoryName %></a>
 					<% } else { %>
 						<%= subcategoryName %>
 					<% } %>
