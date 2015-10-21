@@ -30,15 +30,6 @@ define('ECSlider', function()
 
 (function(application)
 {	
-	if (!window.ECHomepageIncluded)
-	{
-		window.ECHomepageIncluded = true;
-		SC.ECTemplates.macros = _.union(SC.templates.macros, SC.ECTemplates.macros);
-		SC.templates = _.extend(SC.templates, SC.ECTemplates);
-		
-		SC.compileMacros(SC.templates.macros);
-	}
-	
 	if (application.Configuration.modules) {
 		application.Configuration.modules.push('ECSlider');
 	}

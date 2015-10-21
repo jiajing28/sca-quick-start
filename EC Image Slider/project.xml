@@ -15,24 +15,29 @@
       <folder name="src" bundleable="false">
         <folder name="app" bundleable="false">
           <folder name="modules" bundleable="false">
-            <folder name="ECSlider" bundleable="false">
-              <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
-                <description></description>
-                <altTagCaption></altTagCaption>
-              </file>
+            <folder name="ECQSHeroSlider" bundleable="false" exclude="false">
+              <folder name="ECSlider" bundleable="false">
+                <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                  <description></description>
+                  <altTagCaption></altTagCaption>
+                </file>
+              </folder>
+              <folder name="Home" bundleable="false">
+                <file name="ECHomepage.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                  <description></description>
+                  <altTagCaption></altTagCaption>
+                </file>
+              </folder>
+              <folder name="OwlCarousel" bundleable="false">
+                <file name="OwlCarousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                  <description></description>
+                  <altTagCaption></altTagCaption>
+                </file>
+              </folder>
             </folder>
-            <folder name="Home" bundleable="false">
-              <file name="ECHomepage.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
-                <description></description>
-                <altTagCaption></altTagCaption>
-              </file>
-            </folder>
-            <folder name="OwlCarousel" bundleable="false">
-              <file name="OwlCarousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
-                <description></description>
-                <altTagCaption></altTagCaption>
-              </file>
-            </folder>
+            <file name="ECHomepage.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+            <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+            <file name="OwlCarousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
           </folder>
         </folder>
       </folder>
@@ -56,7 +61,7 @@
       <file name="global.css" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
     <folder name="templates" bundleable="false">
-      <folder name="home" bundleable="false">
+      <folder name="hero_slider" bundleable="false">
         <folder name="macros" bundleable="false">
           <file name="slider_img_macro.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
             <description></description>
@@ -68,10 +73,14 @@
           <altTagCaption>EC_home_tmpl</altTagCaption>
         </file>
       </folder>
+      <file name="Templates-014e31d408e1.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="current.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="home_alt.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
-        <altTagCaption>home_tmpl</altTagCaption>
+        <altTagCaption>EC_home_tmpl</altTagCaption>
+      </file>
+      <file name="slider_img_macro.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <altTagCaption>macro</altTagCaption>
       </file>
       <file name="templates.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
         <description></description>
