@@ -76,7 +76,6 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 		
 	,	initialize: function (view)
 		{
-
 			var ecSliderSelector = '[data-type="ec-slider"]';
 
 			_.each(view.$(ecSliderSelector), function(slider) {
@@ -95,7 +94,26 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 		}
 	,	mountToApp: function (application)
 		{
-			application.getLayout().on('afterAppendView', this.initialize);		
+			var self = this; 
+			
+			application.getLayout().on('afterECQSSliderLoaded', function() 
+			{
+				//console.log('---------------- afterECQSSliderLoaded ------------------');
+
+				var Layout = application.getLayout();
+				
+				if (Layout.rendered) {
+					self.initialize(Layout.currentView);
+				} else {
+					application.getLayout().on('afterAppendView', self.initialize);
+				}
+			});
+			
+			/*
+			application.getLayout().on('afterAppendView', function() {
+				console.log('--------------------- afterAppendView --------------------------');
+			});
+			*/
 		}
 			
 	}
@@ -105,7 +123,10 @@ define('OwlCarousel', ['ECSlider'], function (ECSlider)
 
 (function(application)
 {
-	if (application.Configuration.modules) {
-		application.Configuration.modules.push('OwlCarousel');
-	}
+	if (!application.ECQSHeroSliderModules) {
+		application.ECQSHeroSliderModules = [];
+	} 
+		
+	application.ECQSHeroSliderModules.push('OwlCarousel');
+	
 })(SC.Application('Shopping'));

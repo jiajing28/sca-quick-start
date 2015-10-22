@@ -30,7 +30,20 @@ define('ECSlider', function()
 
 (function(application)
 {	
-	if (application.Configuration.modules) {
-		application.Configuration.modules.push('ECSlider');
+	if (!window.ECQSHeroTemplates)
+	{
+	  window.ECQSHeroTemplates = true;
+	  SC.ECQSHeroTemplates.macros = _.union(SC.templates.macros, SC.ECQSHeroTemplates.macros);
+	  SC.templates = _.extend(SC.templates, SC.ECQSHeroTemplates);
+	  
+	  SC.compileMacros(SC.templates.macros);
 	}
+	
+	if (!application.ECQSHeroSliderModules) {
+		application.ECQSHeroSliderModules = [];
+	} 
+		
+	application.ECQSHeroSliderModules.push('ECSlider');
+	
+	
 })(SC.Application('Shopping'));

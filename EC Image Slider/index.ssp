@@ -1,30 +1,18 @@
 var head = document.getElementsByTagName("head")[0];
 
-/*
+document.body.className = document.body.className + ' HERO-index.ssp-' + SC.ENVIRONMENT.jsEnvironment;
+
 loadScript([
-	'/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014d201f5396.js'
-,	'/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014e31d408e1.js'
-,	'/SCA-Quick-Start/EC-Image-Slider/js/Application-014d786daa37.js'
+	'/c.' + SC.ENVIRONMENT.companyId + '/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-01508d4c44cd.js'
+,	'/c.' + SC.ENVIRONMENT.companyId + '/SCA-Quick-Start/EC-Image-Slider/templates/Templates-01508d4c67a3.js'
+,	'/c.' + SC.ENVIRONMENT.companyId + '/SCA-Quick-Start/EC-Image-Slider/js/Application-01508d4c260d.js'
 ]);
-*/
 
-loadScript({
-    url: '/SCA-Quick-Start/EC-Image-Slider/js/libs/Libraries-014d201f5396.js'
-,   seo_remove: true
-});
-loadScript({
-    url: '/SCA-Quick-Start/EC-Image-Slider/templates/Templates-014e31d408e1.js'
-,   seo_remove: true
-});
-loadScript({
-    url: '/SCA-Quick-Start/EC-Image-Slider/js/Application-014d786daa37.js'
-,   seo_remove: true
-});
-
-
-var link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = '/SCA-Quick-Start/EC-Image-Slider/skins/Styles-014d06b48605.css';
-
-head.appendChild(link);
-
+if (SC.ENVIRONMENT.jsEnvironment == 'browser')
+{
+	var link = document.createElement('link');
+	link.rel = 'stylesheet';
+	link.href = '/c.' + SC.ENVIRONMENT.companyId + '/SCA-Quick-Start/EC-Image-Slider/skins/Styles-014d06b48605.css';
+	
+	head.appendChild(link);
+}

@@ -1,108 +1,63 @@
-SC.startShopping = function ()
+ECQS.startHeroSlider = function ()
 {
-	'use strict'; 
-	console.log('Start shopping');
-
+	'use strict';
+	
 	var application = SC.Application('Shopping');
 
-	application.getConfig().siteSettings = SC.ENVIRONMENT.siteSettings || {};
-
-	/*
-	SC.initializeUserEnvironment(application); 
-	application.getUserPromise().done(function() //this is the first promise listener so it will be the first one to be notified.
-	{
-		SC.initializeUserEnvironment(application);
-	});
-	*/
-	
-	// The page generator needs to run in sync in order to work properly
-	if (SC.ENVIRONMENT.jsEnvironment !== 'browser')
-	{
-		jQuery.ajaxSetup({ async: false });
-	}
-		
-	SC.compileMacros(SC.templates.macros);
-
-	// Requires all dependencies so they are bootstrapped
-	require(['Content.DataModels', 'Merchandising.Rule'], function (ContentDataModels, MerchandisingRule)
-	{
-		// Loads the urls of the different pages in the conten service, 
-		// this needs to happend before the app starts, so some routes are registered
-		if (SC.ENVIRONMENT.CONTENT)
-		{
-			ContentDataModels.Urls.Collection.getInstance().reset(SC.ENVIRONMENT.CONTENT);
-			delete SC.ENVIRONMENT.CONTENT;
-
-			if (SC.ENVIRONMENT.DEFAULT_PAGE)
+	var ecqs_modules = application.ECQSHeroSliderModules
+	,	module_options = {}
+	,	modules_list = _.map(ecqs_modules, function (module)
 			{
-				ContentDataModels.Pages.Collection.getInstance().reset(SC.ENVIRONMENT.DEFAULT_PAGE);
-				delete SC.ENVIRONMENT.DEFAULT_PAGE;	
-			}
-		}
-
-		if (SC.ENVIRONMENT.MERCHANDISING)
-		{
-			// we need to turn it into an array
-			var definitions = _.map(SC.ENVIRONMENT.MERCHANDISING, function (value, key)
-			{
-				value.internalid = key;
-				return value;
+				// we check all the options are strings
+				if (_.isString(module))
+				{
+					return module;
+				}
+				// for the ones that are the expectation is that it's an array,
+				// where the 1st index is the name of the modules and
+				// the rest are options for the mountToApp function
+				else if (_.isArray(module))
+				{
+					module_options[module[0]] = module.slice(1);
+					return module[0];
+				}
 			});
 
-			MerchandisingRule.Collection.getInstance().reset(definitions);
-			delete SC.ENVIRONMENT.MERCHANDISING;
-		}
-		
-		// When the document is ready we call the application.start, and once that's done we bootstrap and start backbone
-		application.start(function ()
+	//console.log('module_options', module_options);
+	
+	require(modules_list, function ()
+	{
+		// then we set the modules to the aplication
+		// the keys are the modules_list (names)
+		// and the values are the loaded modules returned in the arguments by require.js
+		application.ECQSmodules = _.object(modules_list, arguments);
+
+		// we mount each module to our application
+		_.each(application.ECQSmodules, function (module, module_name)
 		{
-			////////////////////////////
-			// Bootstrap some objects //
-			////////////////////////////
-			
-
-			// Checks for errors in the context
-			if (SC.ENVIRONMENT.contextError)
+			// We pass the application and the arguments from the config file to the mount to app function
+			var mount_to_app_arguments = _.union([application], module_options[module_name] || []);
+			if (module && _.isFunction(module.mountToApp))
 			{
-				// Hide the header and footer.
-				application.getLayout().$('#site-header').hide();
-				application.getLayout().$('#site-footer').hide();
-				
-				// Shows the error.
-				application.getLayout().internalError(SC.ENVIRONMENT.contextError.errorMessage,'Error ' + SC.ENVIRONMENT.contextError.errorStatusCode + ': ' + SC.ENVIRONMENT.contextError.errorCode);
-			}
-			else
-			{
-				var fragment = _.parseUrlOptions(location.search).fragment;
-			
-				if (fragment && !location.hash)
-				{
-					location.hash = decodeURIComponent(fragment);
-				}
-
-				// OSnly do push state client side.
-				Backbone.history.start({
-					pushState: SC.ENVIRONMENT.seoSupport && SC.ENVIRONMENT.jsEnvironment === 'browser'
-				});
+				application.modulesMountToAppResult[module_name] = module.mountToApp.apply(module, mount_to_app_arguments);
 			}
 		});
+
+		application.getLayout().trigger('afterECQSSliderLoaded', application);
+
 	});
+	
 	// remove the script added for load script function
 	// only if the javascript environment is the seo server
 	if (SC.ENVIRONMENT.jsEnvironment === 'server')
 	{
 		jQuery('.seo-remove').remove();
-	}	
+	}
+	
+	document.body.className = document.body.className + ' ECQS.startHeroSlider-' + SC.ENVIRONMENT.jsEnvironment;
+	
 };
 
+ECQS.startHeroSlider();
 
-	
 
-SC.startShopping();
-
-jQuery(function() 
-{
-	'use strict'; 
-
-	SC.Application('Shopping').getLayout().appendToDom();
-});

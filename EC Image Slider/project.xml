@@ -15,25 +15,17 @@
       <folder name="src" bundleable="false">
         <folder name="app" bundleable="false">
           <folder name="modules" bundleable="false">
-            <folder name="ECQSHeroSlider" bundleable="false" exclude="false">
-              <folder name="ECSlider" bundleable="false">
-                <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
-                  <description></description>
-                  <altTagCaption></altTagCaption>
-                </file>
-              </folder>
-              <folder name="Home" bundleable="false">
-                <file name="ECHomepage.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
-                  <description></description>
-                  <altTagCaption></altTagCaption>
-                </file>
-              </folder>
-              <folder name="OwlCarousel" bundleable="false">
-                <file name="OwlCarousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
-                  <description></description>
-                  <altTagCaption></altTagCaption>
-                </file>
-              </folder>
+            <folder name="ECSlider" bundleable="false">
+              <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                <description></description>
+                <altTagCaption></altTagCaption>
+              </file>
+            </folder>
+            <folder name="OwlCarousel" bundleable="false">
+              <file name="OwlCarousel.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+                <description></description>
+                <altTagCaption></altTagCaption>
+              </file>
             </folder>
             <file name="ECHomepage.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
             <file name="ECSlider.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
@@ -41,7 +33,10 @@
           </folder>
         </folder>
       </folder>
-      <file name="Starter.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
+      <file name="Starter.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <description></description>
+        <altTagCaption></altTagCaption>
+      </file>
       <file name="combiner.config" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
       <file name="current.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
     </folder>
@@ -68,9 +63,9 @@
             <altTagCaption>macro</altTagCaption>
           </file>
         </folder>
-        <file name="home_alt.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
+        <file name="hero_slider_demo.txt" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8">
           <description></description>
-          <altTagCaption>EC_home_tmpl</altTagCaption>
+          <altTagCaption>ECQS_HeroSlider_demo_tmpl</altTagCaption>
         </file>
       </folder>
       <file name="Templates-014e31d408e1.js" bundleable="false" hideInBundle="false" isOnline="true" textFileEncoding="_utf8"/>
